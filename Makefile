@@ -17,4 +17,4 @@ $(TARGET).dvi : $(SRC)
 
 
 clean:
-	rm -f *.bbl *.blg *.aux *.log *~ *.dvi Fig/*.bb
+	rm -f *.bbl *.blg *.aux *.log *~ *.dvi Figs/*.bb

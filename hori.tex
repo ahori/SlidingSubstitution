@@ -274,8 +274,8 @@ node will be proposed and compared.
 
 \subsection{Spare Node Allocation}\label{sec:spare-alloc}
 
-For simplicity, we will consider only 2D networks with XY routing
-routing\citep{Zhang:2009:CRX:1603897.1605067}.
+In this section for simplicity, we will consider only 2D networks with
+static XY routing routing\citep{Zhang:2009:CRX:1603897.1605067}.
 Figure \ref{fig:sparenode-allocation} shows three different ways of
 allocating spare nodes. Each small square represents a node. In the
 left panel, the right-hand column is reserved for spare nodes; this
@@ -1211,12 +1211,21 @@ for lack of spares. Thus, a combination of these methods would seem
 to be the best strategy. We also extended the evaluation to widely
 used collective operations. 
 
-When replacing a failed node with a spare node, the spare node must be
-integrated into the computations. In 1D or 2D sliding, the
-computations on these nodes are migrated. We are planning to develop a
-framework to hide the complexity of allocating and utilizing spare
-nodes. The technical issues and actual overhead cost of doing so will
-be reported when the development is completed.
+Utilizing spare nodes influences various fields in high-performance
+computer design, hardware and software. As shown in the evaluations,
+a network topology plays an important role. It is expected that the
+communication performance degradation found in the substitutions can
+be relaxed by having a dynamic routing. The mapping of applications'
+communication patterns and optimizations of collective
+communication patterns to fit in the available network topology becomes
+very difficult with the presence of failed node substitutions. Because 
+there is no regular pattern where node failure happens and the
+number of node failure patterns are explosive. Therefore the
+assumption to have spare nodes has a significant impact on those
+design.
+
+The research on this failed node substitution with spare nodes has
+just begun. We will continue investigating on this research topic.
 
 \begin{acks}
 We thank Dr. Norbert Attig at J\"{u}lich Supercomputing Center for
