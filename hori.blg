@@ -1,0 +1,52 @@
+This is BibTeX, Version 0.99d (TeX Live 2014)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: hori.aux
+The style file: SageV.bst
+Database file #1: ref.bib
+Warning--entry type for "mpi-v3" isn't style-file defined
+--line 1359 of file ref.bib
+Database file #2: hori.bib
+Warning--empty pages in falanx
+Warning--empty pages in gvr-sc14
+You've used 26 entries,
+            2484 wiz_defined-function locations,
+            735 strings with 11604 characters,
+and the built_in function-call counts, 22753 in all, are:
+= -- 2509
+> -- 298
+< -- 13
++ -- 150
+- -- 74
+* -- 1317
+:= -- 2115
+add.period$ -- 125
+call.type$ -- 26
+change.case$ -- 59
+chr.to.int$ -- 0
+cite$ -- 28
+duplicate$ -- 2689
+empty$ -- 2008
+format.name$ -- 94
+if$ -- 5093
+int.to.chr$ -- 0
+int.to.str$ -- 26
+missing$ -- 229
+newline$ -- 171
+num.names$ -- 24
+pop$ -- 1272
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 383
+stack$ -- 0
+substring$ -- 2901
+swap$ -- 616
+text.length$ -- 13
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 2
+while$ -- 139
+width$ -- 28
+write$ -- 350
+(There were 3 warnings)

@@ -1,0 +1,5 @@
+I agree with Martin.  I think this would be a good service to the community, but it will need to be labeled unofficial - even if we could verify it, we must have only a single, official document.  The sources should still be kept private, but may be shared with the whomever is performing the translation, under the same restriction that the sources not be redistributed or publicly posted.
+
+We should also talk about how you handle any errors that you find.  My experience with the Using MPI-2 book was that the process of translation provided a very careful reading, which inevitably finds errors.
+
+Bill

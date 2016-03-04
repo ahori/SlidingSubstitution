@@ -1,0 +1,899 @@
+\documentclass[10pt,conference,a4paper,fleqn]{IEEEtran}
+
+\usepackage[cmex10]{amsmath}
+\usepackage{times,epsfig}
+\usepackage{pseudocode}
+
+\long\def\comment#1{}
+
+\title{A Study on Communication Performance Degradation Using Spare Nodes}
+
+\author{
+\IEEEauthorblockN{Atsushi Hori, Kazumi Yoshinaga, Yutaka Ishikawa}
+\IEEEauthorblockA{RIKEN Advanced Institute for Computational Science\\
+7-1-26 Minatojima-minami-machi, Chuo-ku, Kobe, Hyogo 650-0047, JAPAN\\
+ahori@riken.jp, kazumi.yoshinaga@riken.jp, yutaka.ishikawa@riken.jp}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+Fault tolerance is gathering attentions since the fault rate of
+high-end supercomputers is increasing. To cope with this situation,
+the fault tolerance techniques have been being investigated.
+User-level algorithm-based fault-tolerance techniques and the
+parallel execution environments enabling jobs to continue their
+execution after node failure happens are so far proposed and
+developed. Even using these, some programs, such as stencil
+computation, having static load balancing are very hard to continue
+their execution efficiently. In this case, having some spare nodes and
+substituting failed with the spare nodes seem to be an effective way.
+
+This paper focuses on this topic, how spare node should be allocated,
+how fault nodes must be substituted by spare nodes, and how much
+communication performance affected by the substitution. The third
+question come from that node-rank mapping changed by the substitution
+and thus there is a possibility of having extra message collisions. In
+a stencil computation, node-rank mapping is done in a straight forward
+way on a Cartesian network without incurring any message
+collisions. However, once the substitution happens, this 
+node-rank mapping might be gone. Therefore, above three questions must
+be answered to minimize the communication performance degradation.
+
+In this paper, several spare node allocation and node substitution
+methods will be proposed, analyzed and compared in terms of
+communication performance after the substitution. It will be shown
+that the P2P communication performance on the K computer can be 1.6
+times slower than that without any failure. The alltoall collective
+communication on the K computer can take more than twice when the
+substitution happens. However, those numbers can be reduced by using
+a proper substitution method.
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+fault tolerance; fault mitigation; spare node; communication performance;
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Fault tolerance is gathering attentions since the fault rate of
+high-end supercomputers is increasing\cite{techrep10040} and
+now users are experiencing that their jobs are aborted due to some
+system errors\cite{6903615}. To cope with this situation, the fault
+tolerance techniques have been being investigated. Checkpoint and
+restart for parallel jobs is a well-known technique which enables jobs
+can continue their execution from a previous checkpoint (there are so
+many papers on checkpoint and restart, however, the most notable one
+is \cite{CLIP}).  
+
+Soon after applying the checkpoint technique to the jobs running on
+large parallel machines, it was recognized that the I/O to save the 
+checkpoint data became a bottleneck. Much research effort on this
+topic is being propelled (\cite{Sato:2012:DMN:2388996.2389022}, for
+example). On the other hand, user-level checkpoint where user
+program takes care of checkpoint and restart attracts
+researchers and programmers. Since user program knows  
+which data to be saved and which data not to be saved, the amount of
+checkpoint data can be drastically reduced, and thus, the I/O time can
+be reduced so much with the sacrifice of extra user programing. 
+
+Davies {\it et al.} showed that a user program can be fault-tolerant
+without checkpointing\cite{Davies:2011:HPL:1995896.1995923}. In this
+technique, the parity to recover the lost data can be embedded into the
+LU decomposition algorithm and user program can survive from failure
+without checkpointing. This is a great discovery, however, it
+opens a new research topic. Users can write a program which can handle
+fault, however, lower-level system software does not allow users to do
+it. MPI is a most widely-used communication library and its
+specification is well-defined\cite{mpi-v3}. Unfortunately, the current
+MPI standard defines nothing when a fault happens in the middle of MPI 
+communication. Thus, the user-level fault handling cannot be
+implemented with the current MPI standard.
+
+To define the MPI behaviour in the presence of fault, User-level
+Failure Mitigation (ULFM) is proposed and being developed to handle
+process failures and node failures\cite{Bland01082013}. ULFM provides
+the API so that the modification of the existing MPI specification is 
+minimized. Even using ULFM, user-level fault handling is not easy at
+all, and some frameworks are proposed to alleviate user effort.
+Falanx is a fault tolerant framework for master-worker programing
+model. Local Failure Local Recovery (LFLR) is another fault tolerant
+framework\cite{Teranishi:2014:TLF:2642769.2642774} which covers wider 
+programing model than that Falanx can support. Both Falanx and LFLR
+are implemented by using ULFM. Global View Resilience (GVR) is another
+user-level fault mitigation system based on PGAS programing
+model\cite{gvr-sc14,GVR-vecpar2014}.
+
+We believe that the user-level fault handling code must be as simple
+as possible. The situation where the code of handling the first
+node failure is different from the code of handling of second or more
+number of node failure must be avoided, because it is very hard to
+produce these situation to test the program. This kind of complexity
+must be hidden by a system software.
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/NodeFailure.eps,width=80mm}
+  \caption{An example of node failure and recovery} 
+  \label{fig:node-failure}
+\end{center}
+\end{figure}
+
+Figure\ref{fig:node-failure} shows an example of a node failure in a
+2D network consisting of 36 nodes. Here, it is assumed that a job is
+running on this machine, and the job is written with a fail-stop-free
+runtime system, such as ULFM. When the node 21 goes down (left of
+Figure\ref{fig:node-failure}, The job running on those 36 nodes can
+take one of the following actions; 
+
+\begin{itemize}
+\item Abort the job execution and resubmit the job (from a previous
+  checkpoint, if possible), or
+\item The remaining 35 nodes take over the job.
+\end{itemize}
+
+In the former strategy, the user-level fault handling can do nothing. 
+In the latter strategy, the task allocated to the failed node must
+be leveled by the remaining 35 nodes, otherwise load imbalanced incurs
+extra overhead in addition to the loss of one node. If the job has the
+capability of dynamic load balancing, such as master-worker models or
+particle-in-cell simulations, then the load imbalance can be leveled by
+the application itself without modifying the code so much. However, if
+the job is a stencil application, this kind of applications does not
+have dynamic load balancing capability in most cases, fault handling
+is not easy at all. In most stencil computation, communication pattern
+is static and load balancing is also static. To preserve the
+communication pattern, one possible idea to handle a node failure is
+to exclude the row and column including the failed node (middle of
+Figure\ref{fig:node-failure}) to preserve the stencil communication
+pattern. However, the task allocated to the 
+failed node must be leveled with the other running nodes (right of
+Figure\ref{fig:node-failure}). This load-leveling is an additional
+code to handle the fault, and this must be avoided if possible.
+\comment{ This is
+  to say that there is a job class   which can handle node failure
+  easily and the job class which cannot handle node 
+  failure easily. }
+
+If a system software reserves a set of spare nodes in advance, and the
+failed node is replaced by the spare node, then the user-level  
+node failure handling can be much easier, because the number of nodes
+involved in the computation is the same. LFLR assumes the use of
+spare node. GVR, although detailed recovery process is hidden from
+users, may utilize spare nodes. However, at the best of our knowledge,
+there is no discussion how to reserve spare nodes and how to replace
+a failed node with a spare node. As an evaluation index, we chose
+communication performance. This is because the use of spare nodes may
+introduce extra message collisions. We will explain this situation in
+the next section.
+
+This paper reports our investigation result on these issues. We
+propose several spare node replacement methods. The proposed methods
+are discussed and compared from the viewpoint of communication
+performance degradation. The most contribution of this paper is
+proposing and comparing spare node allocation and substitution for
+fault nodes by focusing on communication performance degradation.
+
+\section{Using Spare Nodes}
+
+Hereafter, the network has a multi-dimensional Cartesian (mesh and/or
+torus) topology. This is because 4 machines out of the top 5 machines
+listed in the TOP500\cite{top500} as of November 2014 have a network
+with such a topology\ref{tbl:top5-network}. 
+
+\begin{table}[htb]
+\centering
+\caption{Network topology of Top5 machines\cite{top500}}
+\label{tbl:top5-network}
+\begin{tabular}{c|l|r|l} 
+\hline
+Top500 rank & Name & \# Cores & Topology \\
+\hline
+1 & Tianhe-2 & 3,120,000 & FatTree \\
+2 & Titan (Cray XK7) & 560,640 & 3D Torus \\
+3 & Sequoia (BG/Q) & 1,572,864 & 5D Torus/Mesh \\
+4 & the K computer & 705,024 & 6D Torus/Mesh \\ 
+5 & Mira (BG/Q) & 786,432 & 5D Torus/Mesh \\
+\hline
+\end{tabular}
+\end{table}
+
+From the programmers point of view, having spare nodes and fault nodes
+substituted by the spare nodes is not so difficult. With MPI, the
+modification is 1) a new MPI communicator is created where the fault
+node is extracted (on ULFM, {\tt MPI\_Comm\_shrink} do this) and a
+selected spare node is added in, 2) the spare node is set up to take
+over the execution on the failed node. The other part of the program
+can be as it was. This means that the logical topology provided by
+the new MPI communicator can be the same as before the failure,
+however, the actual physical topology cannot be the same. New message
+collisions which cannot be seen when the system has no fault node can
+be seen when some nodes go down. 
+
+Therefore, fault nodes substitution with spare nodes must be
+carefully done to minimize the communication performance
+degradation. There are many aspects to be considerd in this, not only
+the communication performance, but also system utilization, job turn
+around time, easiness of user programing, framework to be developed,
+and so on. Unfortunately, there is almost no research has been done so
+far. So, in this paper, we pay attention to the communication
+performance mostly. 
+
+Throughout this paper, only the node failure is our concern. Network
+failure may happen but it is assumed that the network failure can be
+recovered by the network itself\cite{Domke:2014:FND:2683593.2683659}
+(see also Section\ref{sec:related-work}). The Tofu network which is
+used by the K computer has some redundant links to detour the failed
+node\cite{sumimoto-k}. It is assumed that a job can survive even with
+the node failure(s) by using a parallel computing environment which
+provides user-level fault mitigation mechanism such as ULFM, and the
+process(es) running on a failed node can be recovered anyhow, from a
+checkpoint or by using parity of the other alive processes. Finally,
+It is also assumed that the processes running on a node can be
+migrated to any other node.  
+
+In the next subsection, spare node allocation will be discussed. And 
+the possibility of degradation of communication performance will be
+shown. Then, three methods of substitution of spare node for fault
+node will be proposed and compared. 
+
+\subsection{Spare Node Allocation}\label{sec:spare-alloc}
+
+Just for simplicity, 2D network is used hereinafter for
+explanation. On the higher dimensional networks with the dimension
+order routing (the higher order of XY
+routing\cite{Zhang:2009:CRX:1603897.1605067}) where the messages are 
+routed in the dimension order, and this results in that the messages
+are eventually routed to the plane consisting of the last two
+dimensions. Thus, the discussion using the 2D network is meaningful. 
+
+Figure\ref{fig:sparenode-allocation} shows three different spare node
+allocations. Each small square represents a node. Left one in this figure,
+a column of right side of the 2D plain is reserved for spare node
+set. In the middle one, 2 sides (right and bottom) are reserved for
+spare node set. In the rightmost one, 2 sides having 2 nodes thickness
+are reserved. Those spare node reservations are denoted as {\it
+  2D(1,1)}, {\it 2D(2,1)} and {\it 2D(2,2)}, respectively. ``2D''
+means that the reservation is done on the 2D plane. The first number
+in the bracket is the number of sides where spare nodes reside. The
+second number is the thickness, number of spare nodes on each side. 
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/SpareNodeAllocation.eps,width=80mm}
+  \caption{Spare node allocation} 
+  \label{fig:sparenode-allocation}
+\end{center}
+\end{figure}
+
+Spare nodes are allocated at the side(s) of 2D plain in Figure
+\ref{fig:sparenode-allocation} so that a stencil computation
+having non-periodical boundaries will not have any overhead. 
+This is not true with the stencil computation having periodic
+boundaries and the network having torus topology. However, the
+overhead comes from the increased hop count by one. This is very small
+(100ns per hos, in the K computer). 
+
+The percentage of the number of spare nodes to the number of nodes
+allocated for this job in the 2D(2,2) case can be expressed in the
+following expression. 
+
+\[
+R_{2D(2,2)} = 1 - ( N^{1/2} - 2 )^2 / N
+\]
+
+In more general, $qD(r,s)$ case, the spare node percentage can be
+expressed in the following expression.
+
+\[
+R_{qD(r,s)} = 1 - \frac{ ( N^{1/q} - s )^r \times ( N^{1/q} )^{q-r} }{ N }
+\]
+
+Here, $r \leq q$ and $s < N^q$. Note that this expression is not
+precise because the number of nodes are integer and ignoring the
+flooring effect. However, this graph can be useful for how spare node
+percentage will be over the number of nodes for a job. 
+
+Figure \ref{fig:sparenode-percentage} shows the percentage of spare
+nodes based on the expression. As shown in this
+figure, the higher the order of network dimensions, the higher the
+percentage of spare nodes. The percentage is almost proportional to
+the number of sides used for the spare nodes. Most notably, the larger
+the job size, the lower the percentage. We will discuss on this point
+later in Section \ref{label:multi-job}.
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/R-SpareNodes.eps,width=60mm}
+  \caption{Percentage of spare nodes} 
+  \label{fig:sparenode-percentage}
+\end{center}
+\end{figure}
+
+There can be the case, 4 sides in a 2D plane can be allocated for the
+spare nodes. On a torus network, however, this is almost equal to the
+2D(2,2) case. In the following discussion, we could not find any
+significant difference between 2D(4,1) and 2D(2,2) for example, and
+thus, we omit the cases where $r > q$. The thickness, $s$, does not
+affect the nature of the spare node  substitution method described in
+Section\ref{sec:substitution}, so we investigated the cases having the
+thickness of one. 
+
+Having a spare nodes set can decrease the system utilization
+ratio. However, this does not happen always. On the K computer, the
+size of each dimension of a job must be in a {\it Tofu unit} which has
+12 nodes. When a user
+submits a job to have the 3D shape of 11x11x11, for
+example, the job may have 12x12x12 nodes when the job is
+scheduled. This results in having 3D(3,1) spare nodes. The same
+situations can be seen on the other big 
+machines having Cartesian topology network listed in Table
+\ref{tbl:top5-network}. On BG/Q machines, the number of nodes of a job
+must be the number of power of 2\cite{BGQ}. On Cray XK/7, a job is
+allocated with using the 4 \time 2 \time 8
+blocks\cite{Pena:2013:ATM:2488551.2488564}. Thus, the gap between the
+number of nodes required by a job and the number of nodes actually
+allocated can be used for the spare node set without having any extra
+cost. 
+
+\subsection{Substitution of Spare Node for Fault Node}
+\label{sec:substitution}
+
+Communication performance degradation can be seen because the spare
+node by which fault node is substituted can be allocated far from 
+the original node. Figure \ref{fig:collisions} shows the 5P-stencil
+communication pattern (left). In the 5P-stencil communication on a
+Cartesian topology, no message collision happens because a node
+communicates with its neighbor nodes only. Here, the XY(Z)
+routing is assumed. On the right
+of Figure \ref{fig:collisions}, however, when a fault node (denoted as
+``F'') is substituted by a spare node (denoted as ``S''), the beauty
+of the stencil communication pattern is lost. As shown in this 
+figure, there are 5 message route at the links in the dotted
+ellipse. This means up to 5 message collisions may happen.
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/Collision.eps,width=80mm}
+  \caption{Message Collisions} 
+  \label{fig:collisions}
+\end{center}
+\end{figure}
+
+Figure \ref{fig:node-substitution} shows three node substitution
+methods we proposed. We name them {\it 0D}, {\it 1D} and {\it 2D}
+sliding methods. With the higher dimension networks, 3D or more, the
+those proposed methods can be augmented in a natural way. Just for
+simplicity, we will explain them on 2D network topology only. And we use
+the 5P-stencil communication pattern in many cases, where 4 massages, up,
+down, left, right are sent from a node. In the 9P-stencil
+communication pattern, extra 4 messages are sent to diagonal
+directions. However, in most cases, the length of those diagonal
+messages is much shorter than the messages in the 5P-stencil
+pattern and the effect on the communication performance is considered
+to be small.
+
+\subsubsection{0D Sliding}\label{sec:0d-sliding}
+
+The 0D sliding method is the simplest one among the others. The fault node
+is simply substituted with a spare node (as already shown in Figure
+\ref{fig:node-substitution}. There is a big drawback in this
+method. When a node failure happens on the far end from the spare node
+set, then the hop distance from the failed node and the spare node can
+be very large. This means the possibility of message collisions due to
+the replacement and the higher communication latency due to the large
+number of hop counts. To minimize this, the spare node having the
+shortest Manhattan distance from the failed node should be chosen. 
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/SpareNode.eps,width=80mm}
+  \caption{Fault node substitution methods} 
+  \label{fig:node-substitution}
+\end{center}
+\end{figure}
+
+Figure \ref{fig:0d-worst-cases} shows examples of the 0D sliding results
+with 2D(1,1) spare node allocation when multiple faults happened. In
+the left, Nodes, 1, 2, 4, and 5, are down and substituted spare nodes are
+1', 2', 3', 4', 5', respectively. Those spare nodes are chosen so that
+the hop counts between the fault node and corresponding spare node
+minimized. In the non-periodic 5P-stencil communication in the XY
+routing algorithm, 
+the messages from all of the spare nodes to the adjacent nodes A, B,
+C, D, E, F of the failed nodes are firstly centralized to the node 1'
+(because the X direction routing of the XY routing algorithm) and then
+go to the target nodes. Thus, the network links between 1' and A has
+ten messages plus one which is the normal stencil communication message
+between the nodes (shown in white boxes between 1' and A), and this is
+11. This is the worst case in 0D sliding and the number of fault nodes
+is less than or equal to 6. 
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/0D-WorstCases.eps,width=80mm}
+  \caption{Worst cases in 0D sliding} 
+  \label{fig:0d-worst-cases}
+\end{center}
+\end{figure}
+
+The right of Figure \ref{fig:0d-worst-cases}  shows the case where the
+network topology is 2D mesh, spare nodes are reserved in 2D(1,1),
+faults happen in a row or column, and the row or column is close to
+the side of the network. The failed node 1 is replaced by spare node
+1' and so on. In this case, the failures 
+happen close to the side of the network and the way the spare node
+selection shown in the left of Figure \ref{fig:0d-worst-cases} is
+impossible. In the non-periodic 5P-stencil communication, all messages
+from the spare nodes 4', 5', 6' and 7' to the logically neighbor nodes
+A to V go through the link between 3' and 4'. The number of messages
+is 16, since each node sends 4 messages to its neighbor 4 nodes. This
+situation can happen when the number of faults is larger than or equal
+to 7. The next expression is the relation between the maximum number
+of possible message collisions ($C_{max}$) and the number of node
+failure ($F_n$). Note that when the number of $C_{max}$ is one then
+there is up to one message in any network links and this means no
+collision happens.
+
+\begin{equation}
+C_{max} = \left \{ \begin{array}{ll}
+2 \times F_n + 1 & F_n \leq 6~or~torus~topology \\
+4 \times ( F_n - 3 ) & F_n \geq 7~and~mesh~topology
+\end{array}\nonumber
+\right.
+\end{equation}
+
+This worst case scenario can be relaxed by having spare nodes in
+the 2D(2,1) way. If the failures happen in the same row or column,
+then the spare node must be chosen from the different side
+alternatively, for example. See also Section \ref{sec:comparison}.
+
+Figure \ref{fig:0d-K} shows the observed communication performance
+degradation measured over the number of node measured on the K
+computer. Here, our benchmark program records the worst latency among
+the any possible combination of a fault node and a spare node. Here,
+message size is 4MiB, 5P-stencil communication pattern is sued.
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/Scalability-K.eps,width=70mm}
+  \caption{Worst 5P-stencil communication time with the 0D sliding method
+    on the K computer} 
+  \label{fig:0d-K}
+\end{center}
+\end{figure}
+
+As shown is this graph, the latency is almost three times worse than
+the latency without having any fault node. As described the maximum
+possible message collisions in this case is 5. However, the Tofu
+network hardware of the K computer allows to send 4 messages with 
+different directions at a time, however, this takes 1.6 times larger
+than that just sending one
+messages\cite{shida2012:mpi_kcomputer}. Thus, $5 / 1.6 \approx 3$ is 
+observed. If a network interface hardware can only send one message at
+a time, the communication performance degradation with using spare
+node(s) can be relaxed. The network interface of BG/Q can also send
+multiple messages at once\cite{Chen:2011:IBG:2063384.2063419}. Thus,
+focusing on the maximum message collisions is considered to be
+reasonable.
+
+\comment{
+There can be seen a step when the number of nodes exceed 400. This
+phenomenon can be explained that the MPI for the K computer switches
+internal protocol according to the number of hops
+counts\cite{sumimoto-k}. According to the Sumimoto's presentation, the
+threshold is 40. The farthest hop count of 20x20 network is 40 and
+this matches the observation. XXXXXXXXXXX
+}
+
+Again, the drawback of 0D sliding is the possibility of long distance
+between the fault node and spare node. As shown in Figure
+\ref{fig:0d-K}, the communication latency was observed as three times
+worse, almost independently from the number of nodes. This phenomenon can
+differ when the message pattern is not the same with the 5P-stencil,
+and considering the distance of replacement, the communication
+performance may degrade more severely due to heavy message congestion. 
+
+\subsubsection{1D Sliding}
+
+As described in the previous subsection, in the 0D sliding method,
+even if the closest spare node is chosen, 
+the distance from the failed node cannot be small enough. The 1D sliding
+method can avoid this situation. Figure \ref{fig:1d-sliding} shows how
+the 1D sliding works. When the node 21 goes down, instead of substituting
+the node with a spare node in the 0D sliding, the nodes of the column (or
+row) which includes the failed node from the next of the failed node
+to the end of the column are shifted to the side of spare nodes by one
+(upper left of the figure). In this way, the hop count in the
+5D-stencil communication pattern is increased by only one. This is much
+smaller than the cases with the 0D sliding method. 
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/1D-Sliding.eps,width=85mm}
+  \caption{Example of 1D sliding} 
+  \label{fig:1d-sliding}
+\end{center}
+\end{figure}
+
+In terms of hop counts, 1D sliding method is superior to the
+0D sliding method, however, the recoverable number of fault nodes is
+limited in some cases. Let us think about the case where the second
+failure happens in 2D(2,1) spare node allocation, node 16 following
+the node 21 failure in Figure
+\ref{fig:1d-sliding} for example, and the sliding direction is column
+way now, and then the third failure happens on node 15, then there is
+no space left for the 1D sliding (top row of Figure
+\ref{fig:1d-sliding}). This situation can be avoided by 
+sliding to the column direction on the second failure (middle row of
+Figure \ref{fig:1d-sliding}). 
+
+The number of nodes when the third failure cannot be handled in this
+1D sliding method is the product of the number of sliding on both
+sliding directions. Thus, evenly distributed sliding directions is not
+a good idea. The sliding directions must be uneven as much as
+possible (see sample program codelet in Figure \ref{fig:1d-prog}).
+Even by doing so, there is a case where the 1D sliding method can
+handle up to 3 failures (bottom row in Figure \ref{fig:1d-sliding}).
+
+\begin{figure}[ht]
+\small\tt
+\begin{verbatim}
+bool try_1D_slide( Node fnode ) {
+    if ( try_1D_slide_X( fnode) ) {
+        return true;
+    }
+    if ( try_1D_slide_Y( fnode ) ) {
+        return true;
+    }
+    /* more dimension(s) may follow */
+    return try_0D_slide( fnode );
+}
+\end{verbatim}
+\caption{C program of 1D sliding} 
+\label{fig:1d-prog}
+\end{figure}
+
+The relation between the maximum number of message collisions and the
+number of failed nodes with the 2D(2,1) spare node allocation can be
+expressed as follows. Note that there can be some cases where this
+method cannot handle the situation when the number of node failures is
+larger than 3. 
+
+\[
+C_{max} = 2 + F_n
+\]
+
+\subsubsection{1D+ Sliding}
+
+The situation where fourth or more failure cannot be handled in the 1D
+sliding method can be avoided by modifying the 1D sliding method. The
+left of Figure \ref{fig:1dp-sliding} is the same as the bottom right of
+Figure \ref{fig:1d-sliding}. When the fourth failure of node 15
+happens, the nodes 9, 10 and 10 are slided to the right to make a room
+at the upper node of node 15, and node 15 is moved by one upward
+(right of Figure \ref{fig:1dp-sliding}). This method is named {\it 1D+
+  sliding} method. 
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/1D+Sliding.eps,width=80mm}
+  \caption{1D+ sliding} 
+  \label{fig:1dp-sliding}
+\end{center}
+\end{figure}
+
+\subsubsection{2D Sliding, 3D sliding, ... $q$D sliding}
+
+In the 2D sliding method, rows and columns of node space are shifted by
+one (bottom of Figure \ref{fig:node-substitution}) to make entire row
+or column which include the failed node vacant. With this the 2D sliding
+method, only one node failure in the 2D(1,1) or two node failure in
+2D(2,1) can be handled. If the network has a higher dimension Cartesian
+topology, then the 3D sliding or more higher order sliding can take place
+in the same way.
+
+With the XY routing, messages pass through the vacant row or
+column orthogonally with the row or column. All message routes are the
+same with the ones before the failure. Thus, unlike the 0D and 1D
+sliding methods, although hop counts is increased by one, the message
+congestion can be avoided. Further, this nature is independent from
+the communication patterns of applications. 
+
+\subsection{Comparison of proposed methods}\label{sec:comparison}
+
+Figure \ref{fig:coll-hist} shows the histogram graphs over the number
+of possible message collisions of 5P-stencil (no periodic boundary)
+on the 0D (upper graph) and 1D sliding (lower graph) methods with the
+node allocation patterns of 10x10, 20x20, 40x40, 80x80 and 160x160
+(mesh topology). These numbers are obtained by software simulation. Y
+axes are normalized so that frequency can easily be compared ones with
+the different number of nodes. 
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/Histograms.eps,width=70mm}
+  \caption{Histogram over \# collisions (5P-stencil)} 
+  \label{fig:coll-hist}
+\end{center}
+\end{figure}
+
+As easily be seen, the larger the number of nodes, the higher the
+frequency of the higher message collisions. This is because the low
+message collision cases happen when a failed node is at 1) close to
+the spare node set, 2) at the side of the node plane, or 3) at the
+boundary of 5P-stencil. Thus, when the network topology is torus
+and/or 5P-stencil computation has periodic boundaries, then the worst 
+case frequency will get higher. Anyway, when the number of nodes is
+very large, the worst number of message collisions happens in most
+cases. 
+
+Figure \ref{fig:comparison} shows the number of possible message
+collisions over the number of failed nodes on the 0D sliding method with
+the 2D(1,1) and 2D(2,1) spare node allocation, the 1D sliding method with
+the 2D(2,1) allocation, and the 2D sliding with the 2d(2,1) allocation. 
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/N-Failures.eps,width=82mm}
+  \caption{Comparison of 0D, 1D and 2D sliding (5P-stencil, worst cases)} 
+  \label{fig:comparison}
+\end{center}
+\end{figure}
+
+As already described in Section \ref{sec:0d-sliding}, the number of
+possible message collisions with 0D sliding with the 2D(1,1)
+allocation over the number of failed node depend on the network
+topology, mesh or torus when the number of faults is greater than
+6 (upper left one in the figure). The 1D sliding method with the 2D(2,1)
+spare node allocation can handle 3 failures in worst cases, however,
+it can handle up to the number of spare nodes minus one, since the
+spare node at the corner of the 2D(2,1) allocation cannot be used. And
+the 2D sliding with 2D(2,1) can handle up to two failures in any cases.
+
+\subsubsection{Hybrid method}
+
+The substitution methods described so far are independent with the
+others and can be applied simultaneously. Figure \ref{fig:hybrid-sliding}
+shows the example of this hybrid method. The first and second failures
+are handled by using the 2D sliding method (left and middle of the
+figure), and the third failure is handled by using the 1D sliding
+method (right of the figure). In this way, the message collisions can
+be avoided up to the two failures and the job can survive with having
+more number of failures.
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/Hybrid.eps,width=80mm}
+  \caption{Example of hybrid sliding} 
+  \label{fig:hybrid-sliding}
+\end{center}
+\end{figure}
+
+If stencil program users are willing to have the load redistribution
+shown in Figure \ref{fig:node-failure}, then the vacant nodes as the
+result of the first node failure handling can be used as spare nodes
+and the 0D, 1D, 1D+ and 2D sliding methods can be applied for more
+failures. With the users' sacrifice of extra programing effort of load 
+distribution, the node utilization problem described in Section
+\ref{sec:spare-alloc} to have spare nodes in advance can be avoided. 
+
+However, as shown in Figure \ref{fig:hybrid-sliding}, the node-rank
+mapping is going to be disordered as the number of failed nodes gets
+larger. So far, we have been discussed about the possible message
+collisions on each sliding method, however, it is not proved that the
+number of collisions with the mixed sliding methods, and there can be a
+possibility of having hot spot(s) in the network. To avoid this
+situation, when the disorder reaches at some level, rank numbers of
+nodes are reordered so that the hot spot(s) will be
+removed. Unfortunately, we are unable to find such an algorithm at
+this point. 
+
+\subsection{Collective communication}
+
+Up to now, the P2P communication performance of 5P-stencil
+communication was the concern. In this subsection, the performance of
+collective communication is focused. The communication patterns of
+collective and 5P-stencil communications are very different. Thus, the
+collective communication performance degradation might be some clues of
+the other P2P communication patterns.
+
+On the K computer, the various collective communications are tuned so
+that the best performance can be obtained on the Tofu network. Not
+only the K computer, the tuning of collective protocols is very
+important on the Cray's Gemini network
+too\cite{Pena:2013:ATM:2488551.2488564}. Conversely speaking, it 
+is very difficult to have optimized collective protocols for any
+possible node failure in advance.
+
+On the K computer, each MPI collective communication has some
+conditions on the physical shape of MPI communicator to have the tuned
+protocol. Some of the conditions come from the special protocol tuned
+for the Tofu network and the others come from implementation
+issues. When a substitution of a failed node happens, one or more
+conditions cannot be met. Thus, the collective communication
+performance can degrade much more than that of stencil communication,
+because the tuned special protocol cannot be applied, and because of
+the message collisions described in the 5P-stencil cases described
+above.
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/Barrier-K.eps,width=80mm}
+  \caption{Barrier Performance (12 \time 12 nodes)} 
+  \label{fig:barrier-k}
+\end{center}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/Allreduce-K.eps,width=83mm}
+  \caption{Allreduce Performance (12 \time 12 nodes, 256KiB)} 
+  \label{fig:allreduce-k}
+\end{center}
+\end{figure}
+
+Figure \ref{fig:barrier-k} shows the barrier performance and Figure
+\ref{fig:allreduce-k} shows the allreduce performance (message size is
+256Kib) on the K computer with having one and two node(s) substituted
+in the 0D, 1D and 2d sliding methods. The number of nodes allocated in
+those figures are 12 \time 12 (144), including the spare node set
+with the 2D(2,1) method. In this benchmark program, all possible
+failures are simulated and the worst times are shown at the upper
+horizontal bars, the best times are at shown at the lower horizontal
+bars, and the average of all possible faults are shown at the middle
+horizontal bars. The Y-axes are the relative time compared with the
+cases without having any failed node. So, bigger is worse.
+
+In the barrier collective performance graph, the time variances of 2
+faults are bigger than the cases of having one fault. Especially, the
+worst time when using 1D sliding is close to 2. In the allreduce
+performance graph, the 2D sliding method affects the performance only
+a little bit. Thus, it seems that the 2D sliding method does not break
+the conditions for the allreduce collective operation.
+
+\section{Related Work}\label{sec:related-work}
+
+Ferreira {\it et al.} indicated that dual hardware redundancy which can
+utilize 50% of the hardware resource can be more efficient than
+traditional checkpoint and restart in Exa-scale
+systems\cite{Ferreira:2011:EVP:2063384.2063443} in the future. The
+redundant part can be thought as spare node set. The difference is
+that the redundant nodes are {\it hotter}-standby than the hot standby
+nodes waiting for the intermediate computational status. The spare
+nodes can be substituted for the failed nodes and almost immediately
+take over the computation of the failed node.
+
+Domke {\it et al.} showed communication performance difference in the
+presence of network failure (link or switch) over different network
+topologies and routing
+algorithms\cite{Domke:2014:FND:2683593.2683659}. They analyze the
+communication performance degradation when network links or switches
+go down by software simulation and using TSUBAME2.0. In the K
+computer, the Tofu direct network has redundant routes to bypass
+failed node. However, the job is aborted and resubmit by the operating
+system when the job is running on the failed part. ULFM only
+supports node failures and it does not assume to have any
+network failure. It is a long way to get the goal where
+any kind of failures, node and network, can be mitigated.
+
+\section{Discussion}
+
+\subsection{Node utilization in a multi-job environment}
+\label{label:multi-job}
+
+In most supercomputers are operated with a batch job system, and many
+jobs are running simultaneously. The spare node percentage numbers
+shown in Figure \ref{fig:sparenode-percentage} is the percentage of a
+job, not a system. So, if a machine has one million nodes and 100 jobs
+are running (assume that these jobs run with 10,000 nodes, for
+simplicity) then the overhead of having spare nodes can exceed 10
+\%. 
+
+The possibility for a job to have failure is proportional to the
+number of nodes assigned to the job. Thus, the number of spare nodes
+must also be proportional to the number of nodes of a job. Therefore,
+the number of spare nodes by using the same spare node allocation
+method proposed in this paper can be too many when the number of nodes
+of a job is small. Ideally, the curves shown in Figure
+\ref{fig:sparenode-percentage} must be horizontal lines.
+
+\begin{figure}[ht]
+\begin{center}
+\psfig{figure=Figs/R-SpareNodes-combo.eps,width=60mm}
+  \caption{Combination of spare node allocation methods} 
+  \label{fig:combo-percentage}
+\end{center}
+\end{figure}
+
+Figure \ref{fig:combo-percentage} shows a countermeasure of
+this. Large jobs should have the higher-order spare node allocation
+method and smaller jobs should have lower order spare node allocation
+method so that the spare node percentage gets close to a flat line. In
+the example of Figure \ref{fig:combo-percentage}, the spare node
+percentage is kept in the rage from 2\% to 5 \% by the combination of
+3D(3,1), 3D(2,1) and 3D(1,1) methods.
+
+\subsection{User-level vs. system-level substitution}
+
+So far in this paper, spare nodes are allocated by a job itself. This
+is in our mind to develop a framework using something like ULFM and to
+substitute fault node with a spare node by the framework. By using this,
+users will not be bothered to handle the failure situation. This way to
+allocate and substitute spare nodes by user programs is now named {\it
+  user-level substitution}. Contrastingly, job management layer
+outside of user programs can do this also. This way is called {\it
+  system-level substitution}.
+
+With the user-level substitution, user program is invoked on each spare
+node and waiting for the migration data of failed node in a
+hot-standby way. In this way, the call of {\tt MPI\_Comm\_spawn}
+function, this is not available
+always\cite{Teranishi:2014:TLF:2642769.2642774}, can be avoided. On
+the other hand, system-level substitution can reduce the percentage of
+spare nodes because spare node set can be shared by several
+jobs. For example, spare nodes can be allocated at the boundaries of
+jobs and the spare nodes substitute with the failed nodes of the jobs
+sitting on both side of the boundary. However, the hot standby spare
+nodes which can be available with user-level 
+substitution is impossible. If the spare node set is not an adjacent
+position then it may result in uncontrollable message collisions
+with another job and unexpected communication performance degradation. 
+
+\subsection{Job resubmission vs. fault mitigation}
+
+One may argue that the job can be aborted and then resubmit the job
+from a checkpoint, instead of mitigating the fault. In this way, the
+utilization problem having a spare node set and the communication
+performance degradation described so far in this paper can be
+avoided. The job resubmission, however, may incur the long turn around
+time especially when the system is heavily loaded. And the user-level
+fault mitigation techniques such as described in
+\cite{Davies:2011:HPL:1995896.1995923} can not be utilized. There are
+many aspect and parameters to decide which is better. This paper only
+reveals one aspect, possibility communication performance
+degradation. It is still an open question, which
+is better, job resubmission or fault mitigation.
+
+\section{Summary and Future Work}
+
+In this paper, for jobs which are very difficult to mitigate node
+failure, spare node allocation and substitution with failed 
+nodes methods are proposed, analyzed and compared in terms of
+communication performance after the substitution. The substitution
+methods are 0D, 1D, 1D+, 2D, and higher sliding. In the 5P-stencil
+communication, the higher the order of the sliding method, the less
+message collisions and less number of failed nodes able to
+recover. Thus, the combination of those methods considered to be the
+best. Some collective communications with having spare nodes were also
+investigated.
+
+One thing we missed in this paper is the relation between the actual
+communication performance degradation and the message length. We
+observed small or no performance degradation when the message sizes
+are small. This phenomenon an be explained that jitters when to send
+small messages from nodes prevent message collisions. We are
+investigating this to prove this jitter assumption.
+
+To substitute a filed node with a spare node, spare node must be
+restarted in somehow. To slide nodes in 1D or 2D, computation on these
+nodes must be migrated. We are planning to develop a framework to hide
+the complexity to allocate and utilize spare node set describing in
+this paper. The technical issues and actual overhead of doing so will
+be reported when it is ready. 
+
+\section*{Acknowledgment}
+\comment{
+We thank Franck Cappello, at Argonne National Laboratory. He gave us
+some useful comments.
+}
+This research is partially supported by the CREST project of
+JST (Japan Science and Technology Agency).
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref,hori}
+
+\end{document}
