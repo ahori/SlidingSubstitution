@@ -23,7 +23,6 @@
 
 \begin{abstract}
 
-\comment{
 With the increasing fault rate on high-end supercomputers, the topic
 of fault tolerance has been gathering attention. To cope with this
 situation, various fault-tolerance techniques are under
@@ -34,7 +33,6 @@ techniques, some programs with static load balancing, such as
 stencil computation, may underperform after a failure recovery. Even
 when spare nodes are present, they are not always
 substituted for failed nodes in an effective way.
-}
 This paper considers the questions of how spare nodes should be
 allocated, how to substitute them for faulty nodes, and how much the
 communication performance is affected by such a substitution.
@@ -48,14 +46,15 @@ must be answered in a way that minimizes the degradation of
 communication performance.
 In this paper, several spare-node allocation and node-substitution
 methods will be proposed, analyzed, and compared in terms of
-communication performance following the substitution. It will be shown
-that when a failure occurs, the peer-to-peer (P2P)
-communication performance on the K computer can be slowed by a factor
-of three and collective performance can be cut in half. On
-BG/Q, P2P performance can be slowed by a factor of five and
-collective performance can be slowed by a factor of ten. 
-However, those numbers can be reduced by using an appropriate
-substitution method.
+communication performance following the substitution. Several
+substitution methods are proposed and named sliding methods. The
+proposed methods are analyzed by using our developed simulation
+program and evaluated by using the K computer, BG/Q and TSUBAME
+2.5. It will be shown that when a failure occurs, the stencil
+communication performance on the K and BG/Q can be slowed around ten
+times depending on the number of node failures.  
+The barrier performance on the K can be cut in half. On
+BG/Q, barrier performance can be slowed by a factor of ten. 
 Further, it will also be shown that no communication performance
 degradation with failed node substitution can be seen on TSUBAME 2.5
 has Fat-Tree network, while the K computer and BG/Q
@@ -191,9 +190,13 @@ degradation. The contributions of this paper are;
 \begin{itemize}
 \item spare node allocation methods are proposed,
 \item failure node substitution methods are proposed,
-\item some behaviour and characteristics of proposed spare node
-  allocation and substitution methods are revealed by simulations and
-  evaluations on the K computer, BG/Q and TSUBAME 2.5,
+\item focusing on stencil communication and some collective
+  performance, the behaviour and characteristics of proposed spare
+  node allocation and substitution methods are revealed by simulations, and
+\item evaluations on the two supercomputers having a Cartesian network
+  topology and one supercomputer having a FatTree network topology take
+  place to see how a network topology affects the communication
+  performance degradation
 \end{itemize}
 
 \section{Using Spare Nodes}
@@ -1196,7 +1199,8 @@ all healthy nodes. In this case, node substitution methods described
 in this paper and/or algorithms to find an optimal node-rank
 mapping must be applied from the beginning of job execution. Therefore
 we believe the research on node substitution and the algorithm to find 
-(sub)optimal node-rank mapping will be very important.
+(sub)optimal node-rank mapping will be very important. This is left
+for our future work.
 
 \section{Summary and Future Work}
 
@@ -1221,8 +1225,8 @@ communication patterns to fit in the available network topology becomes
 very difficult with the presence of failed node substitutions. Because 
 there is no regular pattern where node failure happens and the
 number of node failure patterns are explosive. Therefore the
-assumption to have spare nodes has a significant impact on those
-design.
+assumption to have spare nodes has a significant impact on hardware
+and software design.
 
 The research on this failed node substitution with spare nodes has
 just begun. We will continue investigating on this research topic.
