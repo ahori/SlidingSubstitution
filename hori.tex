@@ -33,6 +33,7 @@ techniques, some programs with static load balancing, such as
 stencil computation, may underperform after a failure recovery. Even
 when spare nodes are present, they are not always
 substituted for failed nodes in an effective way.
+
 This paper considers the questions of how spare nodes should be
 allocated, how to substitute them for faulty nodes, and how much the
 communication performance is affected by such a substitution.
@@ -44,11 +45,12 @@ message collisions. However, once a substitution has occurred, the
 optimal node-rank mapping may be destroyed. Therefore, these questions
 must be answered in a way that minimizes the degradation of
 communication performance.
+
 In this paper, several spare-node allocation and node-substitution
 methods will be proposed, analyzed, and compared in terms of
-communication performance following the substitution. Several
-substitution methods are proposed and named sliding methods. The
-proposed methods are analyzed by using our developed simulation
+communication performance following the substitution. The proposed
+substitution methods are named {\it sliding method}s. The sliding
+methods are analyzed by using our developed simulation
 program and evaluated by using the K computer, BG/Q and TSUBAME
 2.5. It will be shown that when a failure occurs, the stencil
 communication performance on the K and BG/Q can be slowed around ten
@@ -193,10 +195,10 @@ degradation. The contributions of this paper are;
 \item focusing on stencil communication and some collective
   performance, the behaviour and characteristics of proposed spare
   node allocation and substitution methods are revealed by simulations, and
-\item evaluations on the two supercomputers having a Cartesian network
-  topology and one supercomputer having a FatTree network topology take
-  place to see how a network topology affects the communication
-  performance degradation
+\item evaluations results on the two supercomputers having a Cartesian
+  network topology and one supercomputer having a FatTree network
+  topology are shown to how a network topology affects the communication
+  performance degradation.
 \end{itemize}
 
 \section{Using Spare Nodes}
@@ -215,8 +217,7 @@ the TOP500 Super Computer Site\citep{top500}, November
 {\small
 \begin{tabular}{c|l|r|l}
 \hline
-Top500 & &  & \\
-rank & Name & \# Cores & Topology \\
+Rank & Name & \# Cores & Topology \\
 \hline
 \hline
 1 & Tianhe-2 & 3,120K & FatTree \\
@@ -656,7 +657,7 @@ In the next section, some simulation results will be shown followed by
 an evaluation section on the K computer, BG/Q and TSUBAME
 2.5\cite{tsubame}. One may 
 argue that the numbers (percentages) of failed nodes simulated and
-evaluated int this paper are too many and  not realistic. However,
+evaluated in this paper are too many and not realistic. However,
 those simulations and evaluations are done to reveal the behaviour and 
 characteristics of the proposed substitution methods. We believe that
 the research on how to utilize spare nodes is a new frontier of fault
@@ -666,9 +667,9 @@ mitigation.
 
 Since the number of combination of failed nodes is the factorial of
 the number of failed nodes, it is impossible to simulate all possible
-cases especially when the number of nodes is large. Instead of the
-exhaustive search, the simulation results shown in this section are
-obtained with random sampling. 
+cases especially when the number of nodes is large. Instead of having
+the exhaustive search, the simulation results shown in this section
+are obtained with random sampling. 
 
 Figure \ref{fig:100x100}, Figure \ref{fig:12x12x12} and
 Figure \ref{fig:24x24x24} show this simulation results on 2D network
@@ -676,12 +677,12 @@ Figure \ref{fig:24x24x24} show this simulation results on 2D network
 cases), 3D network (7P-stencil, 12x12x12, 3D(2,1) spare node
 allocation, 3,686,400 random cases) and 3D network (7P-stencil,
 24x24x24, 3D(2,1) spare node allocation, 3,686,400 random cases),
-respectively. Each graph compares hybrid sliding method (3 thick
-lines, worst, average and best from top to down) and 0D
-sliding (3 thin lines, similarly, worst, average and best from top to
-down) method. ``Best'' in the legend means the lowest number of
-message collisions, ``Worst'' means the largest number of collisions
-and ``Average'' means the average of all cases. 
+respectively. Each graph compares hybrid sliding method (3 thick and
+grey lines, worst, average and best from top to down) and 0D
+sliding (3 thin and black lines, similarly, worst, average and best
+from top to down) method. ``Best'' in the legend means the lowest
+number of message collisions, ``Worst'' means the largest number of
+collisions and ``Average'' means the average of all cases. 
 
 \begin{figure}[ht]
 \centering
@@ -704,9 +705,9 @@ of node failures.
 In Figure \ref{fig:24x24x24}, however, the hybrid method outperforms 0D
 sliding not so much as in the cases of 100x100 and 12x12x12. Comparing
 the worst numbers, 0D sliding is better in the range of the number of
-node failures between 9 to 261. Comparing the average numbers, 0D
-sliding is better in the range of the number of node failures between
-48 to 739.
+node failures between 10 to 155. Comparing the 
+average numbers, 0D sliding is better in the range of the number of
+node failures between 248 to 740.
 
 \begin{figure}[ht]
 \centering
@@ -716,8 +717,9 @@ sliding is better in the range of the number of node failures between
   \label{fig:24x24x24}
 \end{figure}
 
-It is obvious that a stencil communication matches with a Cartesian
-network if the degree of the network is equal to or higher than the
+It is obvious that stencil communication matches with Cartesian
+topology and no message collisions happen if the degree of the network
+is equal to or higher than the 
 degree of the stencil communication. When a sliding method higher than
 0D takes place, the network links connecting the nodes adjacent to the
 {\it sliding planes} can result in message congestion. Here, {\it
@@ -725,19 +727,21 @@ degree of the stencil communication. When a sliding method higher than
 nodes, except 0D sliding. The number of nodes (or the size of area of
 the plane) adjacent to the 1D sliding plane is smaller than that of 2D 
 sliding. Although the maximum number of message collisions of 1D
-sliding and 2D sliding are the same, the number of collisions of 2D is
-bigger than 1D. So, succeeding substitution may add
-more message collision(s) to the nodes. From this viewpoint, 1D sliding
-might be better than 2D sliding. Based on this idea, hybrid(-2D) or
-hybrid(3D+1D+0D) might outperform hybrid(all).
+sliding and 2D sliding are the same, the number of network links
+having collisions caused by the 2D sliding is bigger than that of
+1D. So, the possibility of adding more message collision(s) to the
+link(s) gets higher. From this viewpoint, 1D sliding might be better
+than 2D sliding. Based on this idea, hybrid(-2D) or hybrid(3D+1D+0D)
+might outperform hybrid(all). 
 
 Figure \ref{fig:24x24x24-hyb-2d} shows the simulation results of
 hybrid(all), already shown in Figure \ref{fig:24x24x24}, and
 hybrid(-2D) to compare. In this figure, the lines of hybrid(-2D) 
 are thick. When attentions is paid to the average lines, hybrid(all)
-outperforms hybrid(all) at the rages at the left most part, from 1 to
-19, and the right most part, from 993 to 1128. Middle part, however,
-hybrid(-2D) performs very well.
+outperforms hybrid(-2D) at the rages at the left most part, from 1 to
+18, and the right most part, from 993 to 1128 which is the number of
+spare nodes. Middle part excepting those ranges, however, hybrid(-2D)
+performs very well. 
 
 \begin{figure}[ht]
 \centering
@@ -749,13 +753,14 @@ hybrid(-2D) performs very well.
 
 Figure \ref{fig:sel-rate} shows the rates of which sliding methods are
 used in the sampling set. Figure \ref{fig:sel-rateA} shows the
-accumulated selection rate. As shown in these figures, the first two
-node failures are substituted by using the 3D sliding method. 2D
-sliding method dominates until 38 node failures. Then, 1D sliding
-method take over until 915 node failures. Finally 0D sliding method takes
-the rest. As shown in Figure \ref{fig:sel-rateA}, when all the spare
-nodes are substituted, 0D, 1D and 2D sliding methods occupy 25\%,
-71\%, and 5\% respectively. 
+accumulated selection rate. As shown in these figures, the first two 
+node failures are substituted by using the 3D sliding method. Because
+spare node allocation is 3D(2,1), two is the maximum number of 3D
+sliding methods. 2D sliding method dominates until having 38 node
+failures. Then, 1D sliding method take over until 915 node
+failures. Finally 0D sliding method takes the rest. As shown in Figure
+\ref{fig:sel-rateA}, when all the spare nodes are substituted, 0D, 1D
+and 2D sliding methods occupy 25\%, 71\%, and 5\% respectively. 
 
 \begin{figure}[ht]
 \centering
@@ -773,7 +778,7 @@ nodes are substituted, 0D, 1D and 2D sliding methods occupy 25\%,
 \section{Evaluations on K, BG/Q and TSUBAME 2.5}\label{sec:eval}
 
 In this section, the sliding methods described so far are evaluated by
-using the actual supercomputers: the K computer
+using the actual supercomputers; the K computer
 JUQUEEN\citep{JUQUEEN}, a BG/Q machine, and TSUBAME 2.5
 listed in Table \ref{tbl:top5-network}.
 This experimental campaign will characterize the difference
@@ -831,11 +836,11 @@ TSUBAME & FatTree & 1$^{\dagger}$ & 4$^{\ddagger}$ & 6$^{\ddagger}$ \\
 Table \ref{tbl:machines} lists some characteristics of the K computer,
 BG/Q and TSUBAME 2.5. The K computer has 4 DMA engines and up to 4
 messages can be sent simultaneously. BG/Q has 11 FIFOs and up to 10
-messages can be sent simultaneously. The network of TSUBAME 2.5 is
-Infiniband\cite{infiniband}. Although TSUBAME has two Infiniband HCAs
-on a node, one of them is used in this paper to avoids the
-interference with the other jobs. So, TSUBAME 2.5, in this case, can
-sent only one message at a time. 
+messages can be sent simultaneously. On the other hand, the network of
+TSUBAME 2.5 is Infiniband\cite{infiniband}. TSUBAME has two
+Infiniband HCAs on a node, one of them is used in this paper to avoids
+the interference with the other jobs. So, TSUBAME 2.5, in this
+evaluation, can sent only one message at a time. 
 
 The rightmost two columns of this table show the ratios to send
 multiple messages simultaneously, four messages with 5P-stencil, six
@@ -847,11 +852,12 @@ slower communication time was observed because simultaneous 4 message
 sending takes 1.7 times of the time of sending one message ($3 \approx
 5/1.7$)\cite{Hori-EuroMPI2015}. One possible reason to explain this
 slowness (1.7 with 5P-stencil and 3.7 with 7P-stencil) is the
-insufficient bandwidth between the memory and network controller chip. 
+insufficient bandwidth between the memory and the network controller
+chip. 
 
 In the following subsection, the evaluation results of the K computer
-and BG/Q are shown. And then, evaluation results of TSUBAME 2.5 are
-described. This is because they have Cartesian network topologies
+and BG/Q are shown, followed by the evaluation results of TSUBAME
+2.5. This is because they have Cartesian network topologies 
 while TSUBAME 2.5 has FatTree network topology. And the behaviour of
 the K and BG/Q is very different from that of TSUBAME 2.5.
 
@@ -879,7 +885,7 @@ the simulation.
 
 As shown in both graphs, the average lines observed on the K computer
 is almost always better than the result of the simulations. This is
-considered as the actual network degree of the K computer (6D) is
+considered as that the actual network degree of the K computer (6D) is
 higher than the degree of the simulation (3D). The links provided by
 the additional dimensions give the paths to bypass resulting lower
 message collisions. Comparing the best lines, the simulation
@@ -956,22 +962,23 @@ about less regular P2P communication patterns as well.
 
 On the K computer, the Tofu network supports hardware barrier. The
 other various collective communications are tuned so that the best
-performance can be obtained based on the Tofu network
+performance can be obtained based on the Tofu network topology and 
 characteristics\cite{sumimoto-k}. The tuning of collective protocols
 is also very important for the Cray's Gemini
 network\cite{Pena:2013:ATM:2488551.2488564}. However, it is very
 difficult to predetermine optimized collective protocols for any
 possible set of node failures. 
 
-In order to tune collective protocol for the Tofu netwotk, each MPI
-collective communication has some conditions for the physical shape of
-the communicator. Some of the conditions come from the special protocol
-tuned for the Tofu network, and the others come from implementation
-issues. When a substitution is made for a failed node, one or more of
-these conditions cannot be met and generic algorithms are used. Thus,
-the performance of the collective communication can degrade much more
-than that of the stencil communication, because the special tuned
-protocols cannot be applied in addition to the collision issue.
+In order to use the tuned collective protocol for the Tofu netwotk,
+each MPI collective communication has some conditions for the physical
+shape of the communicator. Some of the conditions come from the
+special protocol tuned for the Tofu network, and the others come from
+implementation issues. When a substitution is made for a failed node,
+one or more of these conditions cannot be met and generic algorithms
+are used. Thus, the performance of the collective communication can
+degrade much more than that of the stencil communication, because the
+special tuned protocols cannot be applied in addition to the collision
+issue. 
 
 \begin{figure}[ht]
 \centering
@@ -983,14 +990,14 @@ protocols cannot be applied in addition to the collision issue.
 
 Figure \ref{fig:k-collective} shows the relative performance of
 barrier (upper graph) and allreduce (lower graph) collective
-communication based on the performance of no substitutions are
+communications based on the performance of no substitutions are
 made. Nodes of the evaluation job are allocated in 3D(12x12x12) and
 the sampling set is the same as the evaluation of stencil on the
 K computer in the previous subsection. The message size of allreduce
 is 64KiB. 
 
 On the allreduce case, the slowdown cannot be seen with one node
-failure and two node failures. In this evaluation, hybrid sliding
+failure and two node failures. In this evaluation, hybrid sliding 
 methods are used and spare nodes are allocated in 2D(2,1), so 3D
 sliding method can be applied up to two node failures. The sliding
 method having the largest degree happens no message collision as
@@ -1032,11 +1039,12 @@ improve the situation.
 
 \subsection{Evaluations on TSUBAME 2.5}
 
-We ran the same evaluation programs on TSUBAME 2.5, 7x7x7 node
-space with 2D(2,1) spare node allocation. Unlike the K and BG/Q cases,
+We ran the same evaluation programs used in the previous subsection on
+TSUBAME 2.5, 7x7x7 node space with 2D(2,1) spare node
+allocation. Unlike the K and BG/Q cases, 
 we could not see any significant slowdown. The communication
 performance is almost constant within the range of 1.0 to 1.2 over the
-sliding method and the number of node failures, no obvious
+sliding methods and the number of node failures, without obvious
 correlation. To make sure of this phenomenon, we additionally
 evaluated the sliding methods with random node-rank mapping. As far as
 we tried, no obvious performance degradation can be seen.
@@ -1049,7 +1057,7 @@ significance on the node numbers of the nodes connecting to the same
 no effect. 
 
 The other factor of this phenomenon is that the network of TSUBAME 2.5
-is Infiniband. Indeed, TSUBAME 2.5 has two network set so that the
+is Infiniband. Indeed, TSUBAME 2.5 has two network sets so that the
 communication bandwidth can be doubled by utilizing them in the
 multi-rail way\cite{1392963}. One of the network sets is also used for
 Lustre file system and it is likely to have I/O traffics of the other
@@ -1094,10 +1102,10 @@ Brown {\it et al.} proposed a visualizing system of message traffics
 in a communication network\cite{7384355} and they succeeded to
 identify hot-spots. In their case study using the samplesort program
 running on TSUBAME 2.5, 5\% performance gain was obtained by avoiding
-the hot-spots. Conversely speaking, their paper reveals that finding
-an optimal node-rank mapping to level hot-spots according to network 
-topology and communication pattern of an application is not an easy
-task.
+the hot-spots which they discovered by using their tool. Conversely
+speaking, their paper reveals that finding an optimal node-rank
+mapping to level hot-spots according to network topology and
+communication pattern of an application is not an easy task.
 
 \section{Discussion}
 
@@ -1176,15 +1184,15 @@ better to resubmit a job or mitigate the fault.
 
 \subsection{Worm Eaten Node Space}
 
-So far in this paper, a obs is allocated with a node space where there
+So far in this paper, a job is allocated with a node space where there
 is no node failure at the beginning. Usually, when a node failure
 happens, the failed node is to be replaced with a new healthy
 node. To replace the failed node, firstly this node is unplugged from
 a rack and or chassis and then sanity node is plugged in. When a node
 is unplugged from a rack or chassis and if its network is a direct
-network, then the switch associated with the node is also gone. Thus,
-unplugging a node unintentionally simulates a switch failure, even
-with the assumption of no network failure.  When a
+network, then the network switch (router) associated with the node is
+also gone. Thus, unplugging a node unintentionally simulates a switch
+failure, even with the assumption of no network failure. When a
 switch failure happens, network routing must be changed to bypass the
 failed switch and this may affects the other running jobs. So, the
 physical node replacement cannot take place soon after the node
@@ -1197,10 +1205,10 @@ repairing nodes. This may result in the situation where large jobs
 might be allocated with a ``worm-eaten'' node space, instead of having
 all healthy nodes. In this case, node substitution methods described
 in this paper and/or algorithms to find an optimal node-rank
-mapping must be applied from the beginning of job execution. Therefore
-we believe the research on node substitution and the algorithm to find 
-(sub)optimal node-rank mapping will be very important. This is left
-for our future work.
+mapping must be applied at the beginning of job execution and every time
+node failure happens. Therefore we believe the research on node
+substitution and the algorithm to find (sub)optimal node-rank mapping
+will be very important. This is left for our future work.
 
 \section{Summary and Future Work}
 
