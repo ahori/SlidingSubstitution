@@ -1,0 +1,128 @@
+\documentclass[]{letter}
+
+\newcommand{\AH}[1]{%
+  $\langle\langle$#1$\rangle\rangle$}%
+
+\newcommand{\REVIEW}[2]{
+\begin{description}
+\item{COMMENT:}
+#1%
+\item{ANSWER:}
+#2%
+\end{description}
+}
+
+\begin{document}
+
+We thank the reviewers for their insightful comments.  We fixed all
+the writing issues. Below are clarifications for some of the questions
+asked.
+
+\begin{description}
+\item{Reviewer 1}
+
+\REVIEW{Some of the details in the simulation and evaluation sections are
+missing. Was a specific simulator used and, if so, which one? Did the
+evaluation use microbenchmarks, if so, which ones? }
+{We developed the simulator and the benchmark programs by ourselves. }
+
+There are a few English language errors in the text. 
+
+The Related Work section seems to be short. 
+The Shadow Replication work by Rami Melhem et al. and ULFM
+could be added to this section. The impact of communication avoiding
+algorithms, which stencil codes are often targeted for, could be
+discussed. 
+
+\item{Reviewer 2}
+
+Page 7, Line 30:
+– The authors say that the number of combinations of failed node is
+the factorial of the number of failed nodes aka. NC(F) = F! , this
+subsumes the ordering of node-failures, but the experimental setup
+(simulation or evaluation) do not appear to be taking this into
+consideration. 
+
+Page 3, Line 12:
+– The authors do not, benchmark the proposals made for handling the
+node failure against the existing fault tolerant framework.
+– The functional demerits of GVR, ULFM were not mentioned other than
+not being user friendly 
+– Have the authors considered Reinit that appeared in IJHPCA last year
+that makes Link for: New ULFM API’s user friendly.
+
+Page 7, Line 37:
+– The authors need to specify the basis of the choices they they make
+for the simulation setup. 
+– Forexampletheychoose100x100,12x12x12and24x24x24 are there any
+implicit basis for these choices like  simulation time.
+
+Page 4, Line 52:
+– The definition of 2D(2,1) is clear and intuitive, but its not so for 3D(2,1)
+– How does the SNA differ for 3D(2,1) and 2D(2,1)
+– What is the definition for 3D(2,1) spare node allocation?
+
+Page 9, Line 13:
+– Having a explicit/concrete expression for slowdown ratio would
+benefit the reader 
+
+Page 11, Line 55:
+– What does it mean to have a 3D-sliding for a SNA == 2D(2,1)
+
+Page 12, Line 9
+– In the discussion section (quite late), the authors mention that a
+gure 3, that appears very early in the paper the spare node % are for
+                                % individual jobs and not for multi
+                                % job environment, this would not have
+                                % been misleading if mentioned early 
+
+• If component failures are common events are we still relying on
+redundancy (spare-nodes) to tolerate hardware faults, clear
+description of the migration sequence would be helpful. 
+
+• The paper has considerable number of Typos and repeated words, there
+were more than one instance where  the figures and the corresponding
+texts describing them were not matching. 
+
+– Some of the markings in the Legends in the Figures were not clear,
+the use of color in the legend would be  bene cial for the reader
+
+– English and writing style needs review as The article would benefit
+from a close editing. 
+
+– We found it difficult to follow a few of the author’s argument due to
+the many stylistic and grammatical errors and grammatical errors. 
+
+– The ``s<Nq'' is a typo, this should be ``s<Nq''
+
+– The authors quote “white boxes” to be present in the  gure 6, which
+is not explicit.
+
+
+\item{Reviewer 3}
+
+There are several ways in which this paper could be
+improved. The 5P stencil benchmark is not really described in any
+detail, and all simulation and actual performance results are shown in
+relative terms. 
+
+The paper could be improved by providing some more
+details of the benchmark, including important characteristics such as
+message size and message rate. Baseline results that show how the
+performance is impacted by suboptimal allocation patterns would be
+interesting as well. 
+
+Since this work is most relevant for very
+large-scale jobs, a baseline analysis of actual performance
+degradation for different rank mappings would help set bounds for what
+the performance implications are. Details on the benchmark would help
+improve the ability of the benchmark to simulate actual
+applications. 
+
+There are several working and grammatical errors that
+detract from the readability of the paper. It needs a through editing
+pass before publication. 
+
+\end{description}
+
+\end{document}
