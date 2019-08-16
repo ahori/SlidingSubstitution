@@ -4,10 +4,13 @@
 
 \long\def\comment#1{}
 
-\newcounter{commentAH}
+%%\newcounter{commentAH}
+%%\newcommand{\AH}[1]{%
+%%  \refstepcounter{commentAH}%
+%%  \textcolor{blue}{$\langle\langle$\thecommentAH$\rangle\rangle$ {#1}}}%
+
 \newcommand{\AH}[1]{%
-  \refstepcounter{commentAH}%
-  \textcolor{blue}{$\langle\langle$\thecommentAH$\rangle\rangle$ {#1}}}%
+  \textcolor{blue}{#1}}%
 
 \begin{document}
 \runninghead{A. Hori and K. Yoshinaga, et al.}
@@ -311,12 +314,12 @@ reserved, denoted {\it 2D(2,2)}. In this notation, ``2D'' means that
 the allocation applies to the 2D plane, the first number in the
 brackets is the number of sides in which spare nodes are reserved, and
 the second number is the thickness, number of columns or rows, of a
-side of spare nodes reserved. On a 3D network, a job is generally
+side of spare nodes reserved. \AH{On a 3D network, a job is generally
 allocated on a sub-cube. Here, {\it 3D(2,*)} means two 2D side planes
 out of 3 dimensions of the cube are allocated as spare nodes. If the
 allocated cube is regular, having the same size in all dimensions,
 which side to be allocated does not matter. Otherwise, the number of
-spare nodes in the two side planes matters. 
+spare nodes in the two side planes matters. }
 
 \begin{figure}[ht]
 \centering
@@ -347,16 +350,17 @@ percentage of spare nodes can be expressed as follows.
 R_{qD(r,s)} = 1 - \frac{ ( N^{1/q} - s )^r \times ( N^{1/q} )^{q-r} }{ N }
 \]
 
-Here, $r \leq q$ and $s < N^{1/q}$. Note that this expression is not
+Here, $r \leq q$ and AH{$s < N^{1/q}$}. Note that this expression is not
 precise, because the number of nodes is an integer, and the flooring
 effect is ignored. However, this information can be useful for
 determining how the spare node percentage relates to the total number
 of nodes used for a job.
 
 Figure \ref{fig:sparenode-percentage} shows the percentages of spare
-nodes for various numbers of nodes and patterns of allocation. As
-shown in this figure, the more dimensions the network has, the higher
-the percentage of spare nodes. The percentage is almost proportional
+nodes to the whole nodes allocated for a job over the various patterns
+of spare node allocation. As shown in this figure, the more 
+dimensions the network has, the higher the percentage of spare
+nodes. The percentage is almost proportional 
 to the number of sides allocated to the spare nodes. Most notably, the
 larger the job size, the lower the percentage. We will discuss this
 point in the Discussion section.
@@ -364,7 +368,7 @@ point in the Discussion section.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=55mm]{Figs/R-SpareNodes.eps}
-  \caption{Percentage of spare nodes}
+  \caption{Percentage of spare nodes in a job}
   \label{fig:sparenode-percentage}
 \end{figure}
 
@@ -448,19 +452,20 @@ spare node to which the Manhattan distance is the shortest.
 
 Figure \ref{fig:0d-worst-cases} shows examples of the results of
 replacing multiple faulty nodes when using the 0D sliding method with
-the 2D(1,1) allocation. On the left-hand panel, nodes 1 through 5 have
-failed and have been replaced by spare nodes 1' through 5',
-respectively. The spare nodes were chosen so as to minimize the number
-of hop counts between each faulty node and its corresponding spare
-node. With non-periodic 5P-stencil communication in the XY routing
-algorithm, the messages from all of the spare nodes to the nodes (A
-through F) adjacent to the failed nodes are routed through node 1'
-(because of the X direction routing of the XY routing
-algorithm). Thus, there are eleven messages in the network links
-between 1' and A  (these are shown in the white boxes): these ten plus
-the normal stencil communication message between the nodes. This is
-the worst-case scenario for the 0D sliding method, and the number of
-faulty nodes is less than or equal to six.
+the 2D(1,1) allocation. \AH{In this figure, each rectangles represents a
+node, assuming node space can be represented in a 2D way.} On the
+left-hand panel, nodes 1 through 5 have failed and have been replaced
+by spare nodes 1' through 5', respectively. The spare nodes were
+chosen so as to minimize the number of hop counts between each faulty
+node and its corresponding spare node. With non-periodic 5P-stencil
+communication in the XY routing algorithm, the messages from all of
+the spare nodes to the nodes (A through F) adjacent to the failed
+nodes are routed through node 1' (because of the X direction routing
+of the XY routing algorithm). Thus, there are eleven messages in the
+network links between 1' and A  (these are shown in the white boxes):
+these ten plus the normal stencil communication message between the
+nodes. This is the worst-case scenario for the 0D sliding method, and
+the number of faulty nodes is less than or equal to six.
 
 \begin{figure}[ht]
 \centering
@@ -691,14 +696,15 @@ mitigation.
 
 \section{Simulation}\label{sec:sim}
 
-We developed a program to simulate the proposed sliding methods on a
+\AH{
+ We developed a program to simulate the proposed sliding methods on a
 stencil communication with a Cartesian network, and count the maximum
 number of possible message collisions. It was assumed that all stencil
 messages are sent to all stencil dimensions simultaneously. Thus, the
 counted message collisions is the theoretical maximum and the actual
 message collisions on a real machine can be less than the simulated
 numbers because of the skew of sending messages to all dimensions. The
-skeleton of the simulation algorithm is described below;
+skeleton of the simulation algorithm is described below;}
 
 \AH{
 \begin{enumerate}
@@ -707,6 +713,7 @@ skeleton of the simulation algorithm is described below;
   method if the chosen node is not a spare node.
 \item repeat above procedure until the number of failed nodes reaches
   the specified number of failure.
+\item save the node-rank mapping information to a file.
 \item simulate a stencil communication and increment {\it
     msg\_count} of all links on the paths from the source nodes to the
   destination nodes. 
@@ -718,10 +725,10 @@ Since the number of combination of failed nodes is the factorial of
 the number of failed nodes, it is impossible to simulate all possible
 cases especially when the number of nodes is large. Instead of having
 the exhaustive search, the simulation results shown in this section
-are obtained with random sampling. The resulting node-rank mapping
+are obtained with random sampling. \AH{The resulting node-rank mapping
 pattern is saved into a file so that it can be used for evaluations on
 the real machines and we can compare this simulation results with the
-evaluation results on the real machines.
+evaluation results on the real machines.}
 
 We chose the node spaces, 100x100 (2D), 12x12x12 (3D), and 24x24x24
 (3D). We chose the base number of 12 in 3D cases  because the minimum
@@ -869,12 +876,24 @@ DMAs). When the actual number of simultaneous sends is only one, for
 example, the number messages injected into the network is decreased
 and the number of collisions is also reduced.
 
-We measured the latency of those communication operations and the
-slowdown ratio is calculated based on the latency having spare nodes
-without having any node failure. 
-The rank mapping after the node
+\AH{The rank mapping after the node
 failure(s) used in this evaluations are the same as the ones used in
 the simulation in the previous section. 
+We measured the latency of those communication operations and the
+slowdown ratio is calculated based on the latency having spare
+nodes without having any node failure. 
+}
+\AH{
+\[
+S_r^i = L_{substitution}^i / L_{no_substitution}
+\]
+}
+\AH{
+Here, $L_{substitution}^i$ is the measured communication latency after
+$i$th substitution, $L_{no_substitution}$ is the latency without having any 
+node failure but having spare node set, andthe $S_r^i$ is the
+slowdown ratio. 
+}
 
 The proposed sliding methods have been explained and discussed by
 using a 2D Cartesian network, however, the actual physical network can
@@ -1155,6 +1174,22 @@ happen also with the collective communications.
 
 \section{Related Work}\label{sec:related-work}
 
+\AH{Shadow replication proposes another replication scheme
+for fault handling to meet Service Level Agreement
+(SLA)\cite{6785308}. Their unique feature is to minimize the
+additional power consumption by having replication (shadow)
+processes. The authors mind the cloud service providers, SLA
+agreement, and the cost for power consumption. They assume that the
+speed of application execution running as the shadow replica can be
+controlled by using  DVFS. In HPC, unlike cloud computing,
+applications are supposed to run as fast as they can. Having any sort
+of replication process(es) consumes twice hardware resource.  In our
+proposed spare node utilization model, the additional resource for the
+fault mitigation is far less than twice as shown in Figure
+\ref{fig:sparenode-percentage}. However, the time to care SLA at
+supercomputing centers may come in the future. 
+}
+
 Ferreira {\it et al.} indicated that dual hardware redundancy while
 utilizing only 50\% of the hardware resource, might be under some
 assumptions more efficient than the traditional checkpoint and restart
@@ -1187,6 +1222,27 @@ speaking, their paper reveals that finding an optimal node-rank
 mapping to level hot-spots according to network topology and
 communication pattern of an application is not an easy task.
 
+\AH{Fang {\it et al.} argued about the shrinking and
+non-shrinking post-recovery strategies. Although they use the spare
+node for the non-shrinking strategy, they did not propose any
+strategy how to allocate a spare node set, how to select a spare node from
+the spare node set, and how the failed node is substituted. Further,
+their evaluation was done only with BG/Q, whereas we evaluated three
+different supercomputers, the K, BG/Q and TSUBAME 2.5 and revealed
+that the communication performance degradation depends on
+the network. They focused on the increased hop counts after the
+recovery,  but we focused on the number of message collisions. As
+already described, the modern high-performance network 
+exhibits very small latency per hop (around 100ns). The point here is
+that the larger the number of hops, the higher the possibility of
+having message collisions. And the message collisions directly affect
+the communication performance. It should be noted that they reported
+the non-shrinking strategy by using spare nodes is superior, in terms
+of efficiency, to the shrinking strategy if failure rate is high. We
+believe the non-shrinking strategy proposed in this paper would be
+accepted by users in terms of easy of programming and performance. 
+}
+
 \section{Discussion}
 
 \subsection{Node Utilization in a Multijob Environment}
@@ -1195,7 +1251,7 @@ communication pattern of an application is not an easy task.
 Most supercomputers use a batch scheduling system, in which many jobs
 run simultaneously. The spare node percentages shown in Figure
 \ref{fig:sparenode-percentage} are for individuals jobs, not
-systems. If a machine has one million nodes and 100 jobs are running
+for a system. If a machine has one million nodes and 100 jobs are running
 (for simplicity, assume that these jobs each require 10,000 nodes),
 then the overhead cost of spare nodes can exceed 10\%.
 
@@ -1228,21 +1284,24 @@ of the 3D(2,1), 3D(2,1), and 3D(1,1) methods.
 
 So far in this paper, we have considered methods in which the spare
 nodes are allocated by the job. We would like to develop a framework
-that uses something like ULFM and that framework replaces
-faulty nodes with spare nodes, so that users do not need to be
-concerned with how failures are handled. When spare nodes are
+that uses something like ULFM and that framework automatically
+replaces faulty nodes with spare nodes, so that users do not need to
+be concerned with how failures are handled. GVR supporting versioned 
+data backup and providing higher abstraction than that of ULFM might
+be able to supports the proposed spare node substitution. 
+
+When spare nodes are
 allocated and substitutions are determined by user programs, this is
 called as {\it user-level substitution}; when this is done at a lower
 system software level, it is called {\it system-level substitution}.
-
-With user-level substitution, the user program is also invoked at each
-spare node, and it waits in hot-standby mode for the data to migrate
+With the user-level substitution, the user program is also invoked at
+each spare node, and it waits in hot-standby mode for the data to migrate
 from the failed node. This means that calling {\tt MPI\_Comm\_spawn}
 is not required. On the other hand, system-level substitution can
 reduce the percentage of spare nodes, because spare nodes can be
 shared by several jobs. For example, spare nodes can be allocated at
 the boundaries of jobs, and these can be used to replace failed nodes
-on both sides of the boundary. However, it is not possible to have
+on every side of the job boundaries. However, it is not possible to have
 spare nodes on hot standby, as with user-level substitution. If the
 spare nodes are not adjacent to the job in which they are needed, this
 can result in uncontrollable message collisions with other jobs, and
@@ -1295,12 +1354,18 @@ In this paper, we considered methods for allocating spare nodes and
 replacing failed nodes in jobs whose rank-node mapping is critical to
 performance. We compared these methods in terms of
 communication performance following substitutions. The substitution
-methods are 0D, 1D, 2D, higher sliding methods. In the Stencil 
+methods are 0D, 1D, 2D, and higher sliding methods. In the Stencil 
 communication, the higher the order of the sliding method, the fewer
 message collisions but more failure distributions are unrecoverable
 for lack of spares. Thus, a combination of these methods would seem
 to be the best strategy. We also extended the evaluation to widely
 used collective operations. 
+
+We also revealed that such performance degradation after the
+substitution may depends on network characteristics and node-rank
+mapping. If the high failure rate becomes reality, a network might be
+designed in such a way to minimize the performance degradation after
+the substitution.  
 
 Utilizing spare nodes influences various fields in high-performance
 computer design, hardware and software. As shown in the evaluations,
