@@ -885,14 +885,14 @@ nodes without having any node failure.
 }
 \AH{
 \[
-S_r^i = L_{substitution}^i / L_{no_substitution}
+R^i = L_{no\_sub} / L_{sub}^i
 \]
 }
 \AH{
-Here, $L_{substitution}^i$ is the measured communication latency after
-$i$th substitution, $L_{no_substitution}$ is the latency without having any 
-node failure but having spare node set, andthe $S_r^i$ is the
-slowdown ratio. 
+Here, $L_{sub}^i$ is the measured communication latency after
+$i$th substitution, $L_{no\_sub}$ is the latency without having any 
+node failure but having spare node set, and the $R^i$ is the
+slowdown ratio at that time. 
 }
 
 The proposed sliding methods have been explained and discussed by
@@ -1180,14 +1180,14 @@ for fault handling to meet Service Level Agreement
 additional power consumption by having replication (shadow)
 processes. The authors mind the cloud service providers, SLA
 agreement, and the cost for power consumption. They assume that the
-speed of application execution running as the shadow replica can be
-controlled by using  DVFS. In HPC, unlike cloud computing,
-applications are supposed to run as fast as they can. Having any sort
-of replication process(es) consumes twice hardware resource.  In our
-proposed spare node utilization model, the additional resource for the
-fault mitigation is far less than twice as shown in Figure
-\ref{fig:sparenode-percentage}. However, the time to care SLA at
-supercomputing centers may come in the future. 
+speed and power consumption of application execution running as the
+shadow processes can be controlled by using DVFS. In HPC, unlike cloud
+computing, applications are supposed to run as fast as they
+can. Further most supercomputer users do not make
+SLA contracts. Having any sort of replication process consumes twice
+hardware resource.  In our proposed spare node utilization model, the
+additional resource for fault mitigation is far less than twice as
+shown in Figure \ref{fig:sparenode-percentage}. 
 }
 
 Ferreira {\it et al.} indicated that dual hardware redundancy while
