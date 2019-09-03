@@ -3,22 +3,35 @@
 \newcommand{\AH}[1]{%
   $\langle\langle$#1$\rangle\rangle$}%
 
+\newcounter{reviewer}
+\newcounter{commentno}[reviewer]
+
 \newcommand{\REVIEW}[2]{
+\stepcounter{commentno}
 \begin{description}
-\item{COMMENT:}
+\item{COMMENT~\thereviewer-\thecommentno: }
 #1%
-\item{ANSWER:}
+\item{ANSWER~\thereviewer-\thecommentno: }
 #2%
 \end{description}
+\vspace{3mm}
 }
 
 \begin{document}
 
+{\bf\huge Title: Overhead of Using Spare Nodes}
+
+{\bf Authors: Atsushi Hori (Riken), Kazumi Yoshinaga (eF-4), Thomas Herault
+(UT/ICL), Aur\'elien Bouteiller (UT/ICL), George Bosilca (UT/ICL),
+Yutaka Ishikawa (Riken)}
+
 We thank the reviewers for their insightful comments.  We fixed all
-the writing issues. Below are clarifications for some of the questions
+the writing issues. The major changed parts in the manuscript are
+colored blue. Below are clarifications for some of the questions
 asked.
 
 \begin{description}
+\stepcounter{reviewer}
 \item{Reviewer 1}
 
 \REVIEW{Some of the details in the simulation and evaluation sections are
@@ -26,82 +39,176 @@ missing. Was a specific simulator used and, if so, which one? Did the
 evaluation use microbenchmarks, if so, which ones? }
 {We developed the simulator and the benchmark programs by ourselves. }
 
-There are a few English language errors in the text. 
+\REVIEW{There are a few English language errors in the text. }
+{We carefully read the whole manuscript and corrected them.}
 
-The Related Work section seems to be short. 
+\REVIEW{The Related Work section seems to be short. 
 The Shadow Replication work by Rami Melhem et al. and ULFM
-could be added to this section. The impact of communication avoiding
-algorithms, which stencil codes are often targeted for, could be
-discussed. 
+could be added to this section.}
+{We added a paragraph to discuss on the shadow replication in the
+  Related Work section.
+}
 
+\REVIEW{The impact of communication avoiding
+algorithms, which stencil codes are often targeted for, could be
+discussed. }
+{We also added a paragraph discussing the shadow replication and ULFM in the
+  Related Work section. 
+}
+
+\stepcounter{reviewer}
 \item{Reviewer 2}
 
-Page 7, Line 30:
-– The authors say that the number of combinations of failed node is
+\REVIEW{Page 7, Line 30: %
+The authors say that the number of combinations of failed node is
 the factorial of the number of failed nodes aka. NC(F) = F! , this
 subsumes the ordering of node-failures, but the experimental setup
 (simulation or evaluation) do not appear to be taking this into
-consideration. 
+consideration. }
+{
+This is not true. In out simulations and evaluations, a node failure
+happens at a time. To clarify this, we added the procedure at the
+beginning of the Simulation section.
+}
 
-Page 3, Line 12:
-– The authors do not, benchmark the proposals made for handling the
-node failure against the existing fault tolerant framework.
-– The functional demerits of GVR, ULFM were not mentioned other than
-not being user friendly 
-– Have the authors considered Reinit that appeared in IJHPCA last year
-that makes Link for: New ULFM API’s user friendly.
+\REVIEW{Page 3, Line 12: %
+The authors do not, benchmark the proposals made for handling the
+node failure against the existing fault tolerant framework.}
+{
+The Tofu network used on the K computer has a fault tolerant
+capability (see ``Tofu: A 6D Mesh/Torus Interconnect for Exascale
+Computers'',  IEEE Computer, vol.42, ser.11). Yes, we agree with you
+that we should have evaluated communication latencies in the presence
+of real
+node failures. Our focus is the communication behavior with the presence
+of faulty node(s) on the large-scale supercomputers. Such 
+supercomputers are in operation and it is not allowed for us to have
+(artificially generated) faulty node(s) since this affects the other
+users. So we decided to benchmark with simulated fault nodes.
+}
 
-Page 7, Line 37:
-– The authors need to specify the basis of the choices they they make
-for the simulation setup. 
-– Forexampletheychoose100x100,12x12x12and24x24x24 are there any
+\REVIEW{The functional demerits of GVR, ULFM were not mentioned other than
+not being user friendly}
+{
+We are sorry if you have such impression from the manuscript. It is not
+our intention to claim they are not friendly and we checked the
+sentences not to give readers to have such impression.
+}
+
+\REVIEW{Have the authors considered Reinit that appeared in IJHPCA last year
+that makes Link for: New ULFM API’s user friendly.}
+{
+We added some explanation on this.
+}
+
+\REVIEW{Page 7, Line 37: %
+The authors need to specify the basis of the choices they they make
+for the simulation setup.
+
+– For example they choose 100x100,12x12x12 and 24x24x24 are there any
 implicit basis for these choices like  simulation time.
+}
+{
+100, square of 100 is 10,000, was chosen just because it is a nice
+round number to start. 12 is another nice round number for the Tofu
+network on the K computer. A Tofu unit consists of 12 nodes and the
+nodes in the same Tofu unit are reachable with 1-3 hop(s). The nice
+round number on BG/Q is the power of 2. There is no such round number
+on TSUBAME2.5 since it has fat-tree network topology. The K computer is
+larger than the JUQUEEN (BG/Q) and Tsubame 2.5 and we could benchmark
+up to 24x24x24 (13,824) nodes on the K computer. So, we chose 12 as the
+base of node numbers. We added the explanation of Tofu unit to the
+manuscript.  
+}
 
-Page 4, Line 52:
-– The definition of 2D(2,1) is clear and intuitive, but its not so for 3D(2,1)
-– How does the SNA differ for 3D(2,1) and 2D(2,1)
-– What is the definition for 3D(2,1) spare node allocation?
+\REVIEW{Page 4, Line 52: %
+The definition of 2D(2,1) is clear and intuitive, but its not so for 3D(2,1).
+How does the SNA differ for 3D(2,1) and 2D(2,1)? %
+What is the definition for 3D(2,1) spare node allocation?}
+{
+We added the following description; ``On a 3D network, a job is generally
+allocated on a cube. Here, {\it 3D(2,*)} means two 2D side planes
+out of 3 dimensions of the cube are allocated as spare nodes. ``
+}
 
-Page 9, Line 13:
+\REVIEW{Page 9, Line 13:
 – Having a explicit/concrete expression for slowdown ratio would
-benefit the reader 
+benefit the reader}
+{
+The following formula is added.
+\[
+R^i = L_{no\_sub} / L_{sub}^i
+\]
+Here, $L_{sub}^i$ is the measured communication latency after
+$i$th substitution, $L_{no\_sub}$ is the latency without having any
+node failure but having spare node set, and the $R^i$ is the
+slowdown ratio at that time.
+}
 
-Page 11, Line 55:
+\REVIEW{Page 11, Line 55: %
 – What does it mean to have a 3D-sliding for a SNA == 2D(2,1)
+}
+{
+We are very sorry, this is a typo. the SNA should be 3D(2,1) and we
+corrected this.
+}
 
-Page 12, Line 9
-– In the discussion section (quite late), the authors mention that a
-gure 3, that appears very early in the paper the spare node % are for
-                                % individual jobs and not for multi
-                                % job environment, this would not have
-                                % been misleading if mentioned early 
+\REVIEW{Page 12, Line 9: %
+In the discussion section (quite late), the authors mention that a
+Figure 3, that appears very early in the paper the spare node \% are for
+individual jobs and not for multi
+job environment, this would not have
+been misleading if mentioned early}
+{
+We modified some sentences so that Figure 3 is for a single job.
+}
 
-• If component failures are common events are we still relying on
+\REVIEW{If component failures are common events are we still relying on
 redundancy (spare-nodes) to tolerate hardware faults, clear
-description of the migration sequence would be helpful. 
+description of the migration sequence would be helpful. }
+{
+For this purpose, we added migration action in the assumed scenario of
+the proposed substitution in the Introduction section.
+}
 
-• The paper has considerable number of Typos and repeated words, there
+\REVIEW{The paper has considerable number of Typos and repeated words, there
 were more than one instance where  the figures and the corresponding
-texts describing them were not matching. 
+texts describing them were not matching. }
+{
+We are dreadfully sorry for these. We checked whole manuscript and
+corrected all of them.
+}
 
-– Some of the markings in the Legends in the Figures were not clear,
-the use of color in the legend would be  bene cial for the reader
+\REVIEW{– Some of the markings in the Legends in the Figures were not clear,
+the use of color in the legend would be  bene cial for the reader}
+{
+We added colors on the legends.
+}
 
-– English and writing style needs review as The article would benefit
+\REVIEW{– English and writing style needs review as The article would benefit
 from a close editing. 
-
 – We found it difficult to follow a few of the author’s argument due to
-the many stylistic and grammatical errors and grammatical errors. 
+the many stylistic and grammatical errors and grammatical errors. }
+{
+We are dreadfully sorry for these. We checked whole manuscript and
+corrected all of them.
+}
 
-– The ``s<Nq'' is a typo, this should be ``s<Nq''
+\REVIEW{– The ``s<Nq'' is a typo, this should be ``s<Nq''}
+{
+We corrected this typo.
+}
 
-– The authors quote “white boxes” to be present in the  gure 6, which
-is not explicit.
+\REVIEW{– The authors quote “white boxes” to be present in the  Figure 6, which
+is not explicit.}
+{
+We added this white box ecplanation.
+}
 
-
+\stepcounter{reviewer}
 \item{Reviewer 3}
 
-There are several ways in which this paper could be
+\REVIEW{There are several ways in which this paper could be
 improved. The 5P stencil benchmark is not really described in any
 detail, and all simulation and actual performance results are shown in
 relative terms. 
@@ -111,17 +218,42 @@ details of the benchmark, including important characteristics such as
 message size and message rate. Baseline results that show how the
 performance is impacted by suboptimal allocation patterns would be
 interesting as well. 
+}
+{
+We added the explanation of the simulation and benchmark programs we
+used. 
+}
 
-Since this work is most relevant for very
+\REVIEW{Since this work is most relevant for very
 large-scale jobs, a baseline analysis of actual performance
 degradation for different rank mappings would help set bounds for what
 the performance implications are. Details on the benchmark would help
 improve the ability of the benchmark to simulate actual
-applications. 
+applications. }
+{
+The performance degradation due to the failed node substitution
+depends on the communication pattern (P2P, bcast, ...) and how much
+time spent on communication (and/or computation). Yes, it is possible
+to show some real application performance numbers, however, it is
+impossible to show all cases. In theory, the spare node substitution
+affects only on communication. If readers know the ratio of
+communication time and execution time then the readers can easily
+estimate the performance degradation introduced by the substitution.
 
-There are several working and grammatical errors that
+In addition to the communication pattern of an application, there are
+so many parameters, network topology, the number of RDMA engines, and 
+how (MPI) communication library is tuned for the network, which can
+affect the degradation. We agree it is nice to have upper and/lower bound(s) of
+performance differences, this is left for our future work.
+}
+
+\REVIEW{There are several working and grammatical errors that
 detract from the readability of the paper. It needs a through editing
-pass before publication. 
+pass before publication. }
+{
+We dreadfully sorry for this. We checked whole manuscript to correct
+all errors.
+}
 
 \end{description}
 

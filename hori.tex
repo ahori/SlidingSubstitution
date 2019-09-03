@@ -202,7 +202,9 @@ spare node set to substitute the failed node, 3) recover the
 process(es) on the spare node possibly from a checkpoint, 4)
 rearrange the physical process-to-node mapping to minimize the
 communication performance degradation and MPI communicator(s) to
-minimize the change of user program, 5) finally, the user program
+minimize the change of user program, \AH{5) if the new process-to-node
+mapping requires migration of some processes, do the migration, and}
+6) finally, the user program
 resumes its execution.
 
 This paper presents the results of our investigations into these
@@ -286,7 +288,7 @@ recovery is the responsibility of the network
 itself\citep{Domke:2014:FND:2683593.2683659} (see also the Related
 Work section). The Tofu network, which is used by the K
 computer, uses redundant links to detour around failed
-nodes\citep{sumimoto-k}. We will assume that a job can survive even
+nodes\citep{sumimoto-k}\citep{5331902}. We will assume that a job can survive even
 with the failure of one or more nodes when it is operating in a
 parallel computing environment that provides a user-level fault
 mitigation mechanism, such as ULFM, and any processes running on the
@@ -315,7 +317,7 @@ the allocation applies to the 2D plane, the first number in the
 brackets is the number of sides in which spare nodes are reserved, and
 the second number is the thickness, number of columns or rows, of a
 side of spare nodes reserved. \AH{On a 3D network, a job is generally
-allocated on a sub-cube. Here, {\it 3D(2,*)} means two 2D side planes
+allocated on a cube. Here, {\it 3D(2,*)} means two 2D side planes
 out of 3 dimensions of the cube are allocated as spare nodes. If the
 allocated cube is regular, having the same size in all dimensions,
 which side to be allocated does not matter. Otherwise, the number of
@@ -462,7 +464,7 @@ communication in the XY routing algorithm, the messages from all of
 the spare nodes to the nodes (A through F) adjacent to the failed
 nodes are routed through node 1' (because of the X direction routing
 of the XY routing algorithm). Thus, there are eleven messages in the
-network links between 1' and A  (these are shown in the white boxes):
+network links between 1' and A  \AH{(these are shown in the white boxes)}:
 these ten plus the normal stencil communication message between the
 nodes. This is the worst-case scenario for the 0D sliding method, and
 the number of faulty nodes is less than or equal to six.
@@ -686,7 +688,7 @@ method combining all possible methods except $X$ is denoted as
 
 In the next section, some simulation results will be shown followed by
 an evaluation section on the K computer, BG/Q and TSUBAME
-2.5\cite{tsubame}. One may
+2.5\citep{tsubame}. One may
 argue that the numbers (percentages) of failed nodes simulated and
 evaluated in this paper are too many and not realistic. However,
 those simulations and evaluations are done to reveal the behavior and
@@ -863,6 +865,12 @@ measured by repeating the collective call. The message size of the stencil
 communication was set to 4~MiB and the message size of allreduce communication
 is set to 64~KiB.
 %
+A node failure was simulated by excluding a node from the
+computation. It was almost impossible to have a real node failure since
+all the machines we used were in operation and a real node failure,
+even if it could be simulated by making it offline, may affected
+the jobs of the other users running at that time.
+%
 On the K computer and BG/Q, the MPI implementations provided by the vendors were
 used. Supposedly, those collective operations are tuned for their network
 topology and mapping.  This would reveal how the spare node allocation and
@@ -926,7 +934,7 @@ Machine & Topo. & \# DMAs &\multicolumn{2}{c}{Ratio to 1 Msg. Sending}\\
 Name & &  & 5P-Stencil & 7P-Stencil \\
 \hline
 K & 6D Cart. & 4 & 1.7 & 3.7 \\
-BG/Q\cite{Chen:2011:IBG:2063384.2063419} & 5D Cart. & 10 & 1.1 & 1.3 \\
+BG/Q\citep{Chen:2011:IBG:2063384.2063419} & 5D Cart. & 10 & 1.1 & 1.3 \\
 TSUBAME & FatTree & 1$^{\dagger}$ & 4$^{\ddagger}$ & 6$^{\ddagger}$ \\
 \hline
 \multicolumn{5}{l}{\footnotesize $\dagger$ TSUBAME 2.5 has 2 IB
@@ -942,7 +950,7 @@ Table \ref{tbl:machines} lists some characteristics of the K computer,
 BG/Q and TSUBAME 2.5. The K computer has 4 DMA engines and up to 4
 messages can be sent simultaneously. BG/Q has 11 FIFOs and up to 10
 messages can be sent simultaneously. On the other hand, the network of
-TSUBAME 2.5 is Infiniband\cite{infiniband}. TSUBAME has two
+TSUBAME 2.5 is Infiniband\citep{infiniband}. TSUBAME has two
 Infiniband HCAs on a node, one of them is used in this paper to avoids
 the interference with the other jobs. So, TSUBAME 2.5, in this
 evaluation, can sent only one message at a time.
@@ -955,7 +963,7 @@ theory, 5 message collisions, for example, means the communication
 time gets slower 5 times. On the K computer, only 3 times
 slower communication time was observed because simultaneous 4 message
 sending takes 1.7 times of the time of sending one message ($3 \approx
-5/1.7$)\cite{Hori-EuroMPI2015}. One possible reason to explain this
+5/1.7$)\citep{Hori-EuroMPI2015}. One possible reason to explain this
 slowness (1.7 with 5P-stencil and 3.7 with 7P-stencil) is the
 insufficient bandwidth between the memory and the network controller
 chip.
@@ -1066,9 +1074,9 @@ about less regular P2P communication patterns as well.
 On the K computer, the Tofu network supports hardware barrier. The
 other various collective communications are tuned so that the best
 performance can be obtained based on the Tofu network topology and
-characteristics\cite{sumimoto-k}. The tuning of collective protocols
+characteristics. The tuning of collective protocols
 is also very important for the Cray's Gemini
-network\cite{Pena:2013:ATM:2488551.2488564}. However, it is very
+network\citep{Pena:2013:ATM:2488551.2488564}. However, it is very
 difficult to predetermine optimized collective protocols for any
 possible set of node failures.
 
@@ -1161,7 +1169,7 @@ no effect.
 The other factor of this phenomenon is that the network of TSUBAME 2.5
 is Infiniband. Indeed, TSUBAME 2.5 has two network sets so that the
 communication bandwidth can be doubled by utilizing them in the
-multi-rail way\cite{1392963}. One of the network sets is also used for
+multi-rail way\citep{1392963}. One of the network sets is also used for
 Lustre file system and it is likely to have I/O traffics of the other
 jobs. So we decided to use the other network set to
 avoid the interference with the other jobs. Each Infiniband HCA has
@@ -1179,7 +1187,7 @@ happen also with the collective communications.
 
 \AH{Shadow replication proposes another replication scheme
 for fault handling to meet Service Level Agreement
-(SLA)\cite{6785308}. Their unique feature is to minimize the
+(SLA)\citep{6785308}. Their unique feature is to minimize the
 additional power consumption by having replication (shadow)
 processes. The authors mind the cloud service providers, SLA
 agreement, and the cost for power consumption. They assume that the
@@ -1217,7 +1225,7 @@ long way to go until we reach the goal where any kind of failures,
 node and/or network, can be mitigated.
 
 Brown {\it et al.} proposed a visualizing system of message traffics
-in a communication network\cite{7384355} and they succeeded to
+in a communication network\citep{7384355} and they succeeded to
 identify hot-spots. In their case study using the samplesort program
 running on TSUBAME 2.5, 5\% performance gain was obtained by avoiding
 the hot-spots which they discovered by using their tool. Conversely
@@ -1244,6 +1252,24 @@ the non-shrinking strategy by using spare nodes as superior, in terms
 of efficiency, to the shrinking strategy if failure rate is high. We
 believe the non-shrinking strategy proposed in this paper would be
 accepted by users in terms of easy of programming and performance.
+}
+
+\AH{As reported so far, our proposed sliding methods is to reduce the
+  additional latency for the communication after the failed node
+  substitution. There are ongoing works to reduce the communication
+  time by introducing new algorithms to improve the communication time
+  in parallel programs. Communication avoiding
+  algorithms\citep{Demmel:2012:CPS:2340316.2340324} for linear algebra
+  and temporal blocking algorithm for stencil
+  computation\citep{MURANUSHI20151303} are the examples of this
+  approach.  
+  These algorithms could improve both of the program execution time
+  without  having any failed nodes and the execution time after having
+  failed node  substitution. An application that succeeds to hide
+  communication latency perfectly may fail to hide the increased
+  latency due to the spare node substitutions. Thus, it is important
+  to explore the way to minimize the latency introduced by spare node
+  substitutions. 
 }
 
 \section{Discussion}
