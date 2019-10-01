@@ -137,7 +137,7 @@ wider range of programing models than are supported by Falanx. Both
 Falanx and LFLR are implemented by using ULFM. Global View Resilience
 (GVR) is another user-level fault mitigation system; it is based on
 partitioned global address space (PGAS)
-programing model\citep{gvr-sc14,GVR-vecpar2014}.
+programing model\citep{gvr-sc14,CHIEN201529}.
 
 We believe that the user-level fault-handling code must be as simple
 as possible. It is important to avoid situations in which the code for
@@ -218,7 +218,7 @@ degradation. The contributions of this paper are;
 \item spare node allocation methods are proposed,
 \item failure node substitution methods are proposed,
 \item focusing on stencil communication and some collective
-  performance, the behaviour and characteristics of proposed spare
+  performance, the behavior and characteristics of proposed spare
   node allocation and substitution methods are revealed by simulations, and
 \item evaluations results on the two supercomputers having a Cartesian
   network topology and one supercomputer having a FatTree network
@@ -971,7 +971,7 @@ chip.
 In the following subsection, the evaluation results of the K computer
 and BG/Q are shown, followed by the evaluation results of TSUBAME
 2.5. This is because they have Cartesian network topologies
-while TSUBAME 2.5 has FatTree network topology. And the behaviour of
+while TSUBAME 2.5 has FatTree network topology. And the behavior of
 the K and BG/Q is very different from that of TSUBAME 2.5.
 
 \subsection{Evaluations on K and BG/Q}
@@ -1080,7 +1080,7 @@ network\citep{Pena:2013:ATM:2488551.2488564}. However, it is very
 difficult to predetermine optimized collective protocols for any
 possible set of node failures.
 
-In order to use the tuned collective protocol for the Tofu netwotk,
+In order to use the tuned collective protocol for the Tofu network,
 each MPI collective communication has some conditions for the physical
 shape of the communicator. Some of the conditions come from the
 special protocol tuned for the Tofu network, and the others come from
@@ -1272,17 +1272,71 @@ accepted by users in terms of easy of programming and performance.
   substitutions. 
 }
 
+\AH{ULFM~\cite{Bland01082013} supports both shrinking and
+  non-shrinking recovery. Upon the occurrence of a failure, instead of
+  aborting the application 
+  like in legacy MPI, ULFM produces an error code from the impacted
+  communication routines at surviving processes.  
+  Surviving processes may then continue to operate using point-to-point
+  routine between themselves, or interrupt the communication pattern of
+  the application with \texttt{MPIX\_Comm\_revoke} and rebuild fully
+  functional communicators excluding failed processes with
+  \texttt{MPIX\_Comm\_shrink}. When deploying this shrinking recovery
+  model with ULFM, the underlying implementation has no notion of
+  active and spare ranks.  From the ULFM perspective, all ranks are
+  application processes, with the same features. Our work expands on
+  this basic framework by adding at the user level an initial spare
+  allocation strategy as well as a substitution strategy that avoids
+  communication hotspots in the recovered application. The
+  non-shrinking recovery in ULFM builds on top of the previously
+  described shrinking model. Once a new communicator fit for issuing
+  collective operation has been reconstructed with the shrink routine,
+  spawning additional processes can be achieved with traditional MPI-2
+  dynamic process management routines (e.g.,
+  \texttt{MPI\_Comm\_spawn}). The ULFM spawn accepts non-standard
+  arguments to finely select where to allocate additional processes;
+  it is possible to select, from the application, which node will host
+  the supplementary processes. It is important to note however that
+  the default policy in ULFM is a simple round-robin among the
+  available slots in the existing allocation. The user remains in
+  charge of the decision making for advanced placement policy making
+  even in non-shrinking cases. 
+}
+
+\AH{Fenix\cite{Gamell:2014:EAO:2683593.2683691} is a farmework to
+  automate the procedure to substitute  
+  failed node(s) with spare node(s) and to resume 
+  execution from a checkpoint. 
+  Laguna, et al. proposed {\em Reinit} API which is an extension of
+  existing MPI for bulk synchronous applications to survive from node
+  failure\cite{osti_1186781}. Fenix and Reinit provides easier-to-use API than ULFM and
+  supports non-shrinking strategy by assuming a spare node set. 
+  Both works depend on the \texttt{MPI\_Comm\_spawn*}
+  functions to substitute failed nodes. This means that the selection
+  of a spare node and definition of a spare node set depend on the
+  system and choosing a spare node according to a specific substitution 
+  strategy is out of control of applications. Further both did not
+  take into account the possibility of communication performance
+  degradation after the recovery. In contrast, this paper focused on
+  the possibility of such performance degradation and proposed sliding 
+  substitution methods to minimize the degradation. Our proposed
+  sliding methods can be integrated into such frameworks to improve
+  the performance after recovery.
+}
+
 \section{Discussion}
 
 \subsection{Node Utilization in a Multijob Environment}
 \label{sec:multi-job}
 
+\comment{
 Most supercomputers use a batch scheduling system, in which many jobs
 run simultaneously. The spare node percentages shown in Figure
 \ref{fig:sparenode-percentage} are for individuals jobs, not
-for a system. If a machine has one million nodes and 100 jobs are running
+for the whole system. 
+If a machine has one million nodes and 100 jobs are running
 (for simplicity, assume that these jobs each require 10,000 nodes),
-then the overhead cost of spare nodes can exceed 10\%.
+then the overhead cost of spare nodes can exceed 10\%.}
 
 The possibility that a job has a failed node is proportional to the
 number of nodes assigned to the job and execution time. Thus, the

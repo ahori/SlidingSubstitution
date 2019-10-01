@@ -37,7 +37,8 @@ asked.
 \REVIEW{Some of the details in the simulation and evaluation sections are
 missing. Was a specific simulator used and, if so, which one? Did the
 evaluation use microbenchmarks, if so, which ones? }
-{We developed the simulator and the benchmark programs by ourselves. }
+{We developed the simulator and the benchmark programs by
+  ourselves. We updated the text to clarify this point. }
 
 \REVIEW{There are a few English language errors in the text. }
 {We carefully read the whole manuscript and corrected them.}
@@ -66,7 +67,8 @@ subsumes the ordering of node-failures, but the experimental setup
 (simulation or evaluation) do not appear to be taking this into
 consideration. }
 {
-This is not true. In out simulations and evaluations, a node failure
+This is not true. In out simulations and evaluations, it is assumed
+that a node failure
 happens at a time. To clarify this, we added the procedure at the
 beginning of the Simulation section.
 }
@@ -98,7 +100,8 @@ sentences not to give readers to have such impression.
 \REVIEW{Have the authors considered Reinit that appeared in IJHPCA last year
 that makes Link for: New ULFM API’s user friendly.}
 {
-We added some explanation on this.
+We added some explanation in the Related Work Section. We also added
+Fenix in the same section.
 }
 
 \REVIEW{Page 7, Line 37: %
@@ -114,8 +117,8 @@ round number to start. 12 is another nice round number for the Tofu
 network on the K computer. A Tofu unit consists of 12 nodes and the
 nodes in the same Tofu unit are reachable with 1-3 hop(s). The nice
 round number on BG/Q is the power of 2. There is no such round number
-on TSUBAME2.5 since it has fat-tree network topology. The K computer is
-larger than the JUQUEEN (BG/Q) and Tsubame 2.5 and we could benchmark
+on TSUBAME2.5 since it has a fat-tree network. The K computer is
+larger than the JUQUEEN (BG/Q) and Tsubame 2.5 and we could have benchmarked
 up to 24x24x24 (13,824) nodes on the K computer. So, we chose 12 as the
 base of node numbers. We added the explanation of Tofu unit to the
 manuscript.  
@@ -167,7 +170,9 @@ We modified some sentences so that Figure 3 is for a single job.
 redundancy (spare-nodes) to tolerate hardware faults, clear
 description of the migration sequence would be helpful. }
 {
-For this purpose, we added migration action in the assumed scenario of
+Utilizing spare nodes is one of the string option to mitigate node
+failures. 
+We added the migration action in the scenario of
 the proposed substitution in the Introduction section.
 }
 
@@ -182,7 +187,7 @@ corrected all of them.
 \REVIEW{– Some of the markings in the Legends in the Figures were not clear,
 the use of color in the legend would be  bene cial for the reader}
 {
-We added colors on the legends.
+The graphs are colored.
 }
 
 \REVIEW{– English and writing style needs review as The article would benefit
@@ -190,7 +195,7 @@ from a close editing.
 – We found it difficult to follow a few of the author’s argument due to
 the many stylistic and grammatical errors and grammatical errors. }
 {
-We are dreadfully sorry for these. We checked whole manuscript and
+Again we are very sorry for these. We checked whole manuscript and
 corrected all of them.
 }
 
@@ -202,7 +207,7 @@ We corrected this typo.
 \REVIEW{– The authors quote “white boxes” to be present in the  Figure 6, which
 is not explicit.}
 {
-We added this white box ecplanation.
+We added this white box explanation.
 }
 
 \stepcounter{reviewer}
@@ -231,14 +236,15 @@ the performance implications are. Details on the benchmark would help
 improve the ability of the benchmark to simulate actual
 applications. }
 {
-The performance degradation due to the failed node substitution
-depends on the communication pattern (P2P, bcast, ...) and how much
-time spent on communication (and/or computation). Yes, it is possible
-to show some real application performance numbers, however, it is
-impossible to show all cases. In theory, the spare node substitution
-affects only on communication. If readers know the ratio of
-communication time and execution time then the readers can easily
-estimate the performance degradation introduced by the substitution.
+The overall performance degradation of applications due to the failed
+node substitution depends on the communication pattern (P2P, bcast,
+...) and how much time spent on communication (and/or
+computation). Yes, it is possible to show some real application
+performance numbers, however, it is impossible to show all cases. In
+theory, the spare node substitution affects only on communication. If
+readers know the ratio of communication time and execution time then
+the readers can easily estimate the performance degradation introduced
+by the substitution. 
 
 In addition to the communication pattern of an application, there are
 so many parameters, network topology, the number of RDMA engines, and 
@@ -251,8 +257,8 @@ performance differences, this is left for our future work.
 detract from the readability of the paper. It needs a through editing
 pass before publication. }
 {
-We dreadfully sorry for this. We checked whole manuscript to correct
-all errors.
+Again and again, we are very sorry for this. We checked whole
+manuscript to correct all errors.
 }
 
 \end{description}

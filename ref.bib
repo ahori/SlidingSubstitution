@@ -1,3 +1,72 @@
+@techreport{osti_1186781,
+title = {A Global Exception Fault Tolerance Model for MPI},
+author = {Laguna, I and Gamblin, T and Mohror, K and Schulz, M and Pritchard, H and Davis, N},
+type =		"Technical Report",
+institution =	"{Lawrence Livermore National Lab.}",
+number = "LLNL-CONF-659977",
+year = "2014"
+}
+
+@article{doi:10.1177/1094342015623623,
+author = {Ignacio Laguna and David F Richards and Todd Gamblin and Martin Schulz and Bronis R de Supinski and Kathryn Mohror and Howard Pritchard},
+title ={Evaluating and extending user-level fault tolerance in MPI applications},
+journal = {The International Journal of High Performance Computing Applications},
+volume = {30},
+number = {3},
+pages = {305-319},
+year = {2016},
+doi = {10.1177/1094342015623623},
+
+URL = {https://doi.org/10.1177/1094342015623623},
+eprint = {https://doi.org/10.1177/1094342015623623} ,
+    abstract = { The user-level failure mitigation (ULFM) interface has been proposed to provide fault-tolerant semantics in the Message Passing Interface (MPI). Previous work presented performance evaluations of ULFM; yet questions related to its programability and applicability, especially to non-trivial, bulk synchronous applications, remain unanswered. In this article, we present our experiences on using ULFM in a case study with a large, highly scalable, bulk synchronous molecular dynamics application to shed light on the advantages and difficulties of this interface to program fault-tolerant MPI applications. We found that, although ULFM is suitable for master–worker applications, it provides few benefits for more common bulk synchronous MPI applications. To address these limitations, we introduce a new, simpler fault-tolerant interface for complex, bulk synchronous MPI programs with better applicability and support than ULFM for application-level recovery mechanisms, such as global rollback. }
+}
+
+@article{CHIEN201529,
+title = "Versioned Distributed Arrays for Resilience in Scientific Applications: Global View Resilience",
+journal = "Procedia Computer Science",
+volume = "51",
+pages = "29 - 38",
+year = "2015",
+note = "International Conference On Computational Science, ICCS 2015",
+issn = "1877-0509",
+doi = "https://doi.org/10.1016/j.procs.2015.05.187",
+url = "http://www.sciencedirect.com/science/article/pii/S1877050915009953",
+author = "A. Chien and P. Balaji and P. Beckman and N. Dun and A. Fang and H. Fujita and K. Iskra and Z. Rubenstein and Z. Zheng and R. Schreiber and J. Hammond and J. Dinan and I. Laguna and D. Richards and A. Dubey and B. van Straalen and M. Hoemmen and M. Heroux and K. Teranishi and A. Siegel",
+keywords = "Resilience, Fault tolerance, Exascale, Scalable computing, Application-based fault tolerance",
+abstract = "Exascale studies project reliability challenges for future high-performance computing (HPC) systems. We propose the Global View Resilience (GVR) system, a library that enables applications to add resilience in a portable, application-controlled fashion using versioned distributed arrays. We describe GVR's interfaces to distributed arrays, versioning, and cross-layer error recovery. Using several large applications (OpenMC, the preconditioned conjugate gradient solver PCG, ddcMD, and Chombo), we evaluate the programmer effort to add resilience. The required changes are small (<2% LOC), localized, and machine-independent, requiring no software architecture changes. We also measure the overhead of adding GVR versioning and show that generally overheads <2% are achieved. We conclude that GVR's interfaces and implementation are flexible and portable and create a gentle-slope path to tolerate growing error rates in future systems."
+}
+
+@INPROCEEDINGS{6903636, 
+author={A. {Hassani} and A. {Skjellum} and R. {Brightwell}}, 
+booktitle={2014 44th Annual IEEE/IFIP International Conference on Dependable Systems and Networks}, 
+title={Design and Evaluation of FA-MPI, a Transactional Resilience Scheme for Non-blocking MPI}, 
+year={2014}, 
+volume={}, 
+number={}, 
+pages={750-755}, 
+keywords={fault tolerant computing;message passing;middleware;FA-MPI;transactional resilience scheme;nonblocking MPI;supercomputer;fault-tolerant method;scalable programming middleware;fault-aware MPI;MPI programming model;failure detection;failure isolation;failure mitigation;Fault tolerance;Fault tolerant systems;Semantics;Computational modeling;Standards;Synchronization;MPI;Fault-Tolerance;Fault-Awareness}, 
+doi={10.1109/DSN.2014.78}, 
+ISSN={}, 
+month={June},}
+
+@inproceedings{Gamell:2014:EAO:2683593.2683691,
+ author = {Gamell, Marc and Katz, Daniel S. and Kolla, Hemanth and Chen, Jacqueline and Klasky, Scott and Parashar, Manish},
+ title = {Exploring Automatic, Online Failure Recovery for Scientific Applications at Extreme Scales},
+ booktitle = {Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis},
+ series = {SC '14},
+ year = {2014},
+ isbn = {978-1-4799-5500-8},
+ location = {New Orleans, Louisana},
+ pages = {895--906},
+ numpages = {12},
+ url = {https://doi.org/10.1109/SC.2014.78},
+ doi = {10.1109/SC.2014.78},
+ acmid = {2683691},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+} 
+
 @ARTICLE{5331902, 
 author={Y. {Ajima} and S. {Sumimoto} and T. {Shimizu}}, 
 journal={Computer}, 
