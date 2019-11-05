@@ -2,12 +2,8 @@ TARGET = hori
 SRC    = $(TARGET).tex
 TEX    = platex
 PDFTEX = pdflatex
-ANS    = answer
 
-all : $(TARGET).pdf $(ANS).pdf
-
-$(ANS).pdf : $(ANS).tex
-	$(PDFTEX) $(ANS).tex
+all : $(TARGET).pdf
 
 $(TARGET).pdf : $(TARGET).dvi
 	dvipdfm -p a4 $(TARGET).dvi
