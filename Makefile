@@ -14,6 +14,7 @@ $(TARGET).dvi : $(SRC) Makefile
 	bibtex $(TARGET)
 	$(TEX) $(TARGET)
 	$(TEX) $(TARGET)
+	$(TEX) $(TARGET)
 
 clean:
 	rm -f *.bbl *.blg *.aux *.log *~ *.dvi Figs/*.bb

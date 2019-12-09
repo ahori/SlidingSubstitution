@@ -1,0 +1,17 @@
+Atsushi Hori
+Atsushi Hori received Ph.D. from University of Tokyo in 1999. He is a senior scientist of Riken Center for Computational Science, Japan. His research interests include parallel processing, parallel hardware, and runtime system. He is involved in the Fugaku supercomputer development project.
+
+Kazumi Yoshinaga
+Kazumi Yoshinaga is a systems engineer working for eF-4 Co., Ltd., Japan.  He worked as a Postdoctoral Researcher at RIKEN AICS from 2013 to 2016.  He received his B.E., M.E. and Ph.D. degrees in Computer Science and Systems Engineering from Kyushu Institute of Technology.
+
+Thomas Herault
+Thomas Herault is a research director at the InnovativeComputing Laboratory at the University of Tennessee, Knoxville. His research interests include fault tolerance, distributed algorithms, parallel programming paradigms, and performance modeling and optimizations. He focuses on bridging the gap between theoretical distributed systems and high-performance computing as it is practiced.
+
+Aure ́lien Bouteiller
+Aurelien Bouteiller received is Ph.D. from the University of Paris in 2006. He is currently a Research Director at the Innovative Computing Laboratory, the University of Tennessee, Knoxville. He focuses on improving performance and reliability of distributed systems with research in communication and scheduling for many-core, accelerated clusters, and in containing the influence of failures on scientific computation.
+
+George Bosilca
+George Bosilca is a Research Assistant Professor and Adjunct Assistant Professor at the Innovative Computing Laboratory at The University of Tennessee, Knoxville. His research interests evolve around programming paradigms for distributed non-reliable platforms, message passing and other approaches to deal with the scalability, heterogeneity and resiliency at any scale and in any settings. He is actively involved in projects such as Open MPI, ULFM, PaRSEC, DPLASMA.
+
+Yutaka Ishikawa
+Dr. Yutaka Ishikawa is the leader of Fugaku supercomputer development project that deploys the next Japanese flagship supercomputer at Riken Center for Computational Science, Japan.  From 2002 to 2014, he was a professor at the University Tokyo. From 1993 to 2001, he was the chief of Parallel and Distributed System Software Laboratory at Real World Computing Partnership, Japan.  From 1987 to 2001, he was a member of AIST (former Electrotechnical Laboratory).
