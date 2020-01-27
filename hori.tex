@@ -6,16 +6,6 @@
 \bibliographystyle{abbrvnat}
 \setcitestyle{authoryear,open={(},close={)}}
 
-\long\def\comment#1{}
-
-%%\newcounter{commentAH}
-%%\newcommand{\AH}[1]{%
-%%  \refstepcounter{commentAH}%
-%%  \textcolor{blue}{$\langle\langle$\thecommentAH$\rangle\rangle$ {#1}}}%
-
-\newcommand{\AH}[1]{%
-  \textcolor{blue}{#1}}%
-
 \begin{document}
 \runninghead{A. Hori and K. Yoshinaga, et al.}
 \title{Overhead of Using Spare Nodes}
@@ -510,16 +500,6 @@ allocated in the 2D(2,1) pattern. If the failures happen in the same
 row or column, then the spare nodes must be chosen from alternating
 sides.
 
-\comment{Again, the drawback of the 0D sliding method is the
-  possibility of a long distance between the faulty node and the spare
-  node. As shown in Figure \ref{fig:0d-K} shown in the next
-  subsection, the communication latency was observed to be three times
-  larger, and this was almost independent of the number of nodes. This
-  phenomenon can differ when the message pattern is not the same as
-  that of the 5P-stencil, and When the distance to the replacement is
-  considered, the communication performance may be severely degraded
-  due to heavy message congestion.}
-
 \subsubsection{1D sliding}
 
 As described in the previous subsection, in the 0D sliding method,
@@ -555,29 +535,8 @@ the 1D sliding method is the product of the number of slidings in each
 direction, when the thickness of the sparenode set is one. Thus, it is
 not a good idea to evenly distribute the
 sliding directions; instead, they should be as uneven as possible.
-\comment{(see the sample program codelet in Figure \ref{prg:1d-prog})}
 Even when this is done, however, the 1D sliding method may be limited
 to three failures (bottom row in Figure \ref{fig:1d-sliding}).
-
-\comment{
-\begin{figure}[ht]
-\small\tt
-\begin{verbatim}
-bool try_1D_slide( Node fnode ) {
-    if ( try_1D_slide_X( fnode) ) {
-        return true;
-    }
-    if ( try_1D_slide_Y( fnode ) ) {
-        return true;
-    }
-    /* more dimension(s) may follow */
-    return try_0D_slide( fnode );
-}
-\end{verbatim}
-\caption{C program for 1D sliding}
-\label{prg:1d-prog}
-\end{figure}
-}
 
 The relation between the maximum number of message collisions and the
 number of failed nodes with the 2D(2,1) spare node allocation pattern
@@ -1232,11 +1191,12 @@ speaking, their paper reveals that finding an optimal node-rank
 mapping to level hot-spots according to network topology and
 communication pattern of an application is not an easy task.
 
+
 Fang {\it et al.} argued about the shrinking and
 non-shrinking post-recovery
-strategies\citep{10.1007/978-3-319-27308-2_53}. Although they use the
-spare 
-node for the non-shrinking strategy, they did not propose any
+strategies\citep{10.1007/978-3-319-27308-2_53}. 
+Although they use the spare node for the non-shrinking strategy, they
+did not propose any 
 strategy on how to allocate a spare node set, how to select a spare node from
 the spare node set, nor how the failed node is substituted. Further,
 their evaluation was done only with BG/Q, whereas we evaluated three
@@ -1471,5 +1431,20 @@ the Japan Science and Technology Agency (JST).
 \end{funding}
 
 \bibliography{ref,hori}
+
+\begin{biog}
+Atsushi Hori
+
+Kazumi Yoshinaga
+
+Thomas Herault
+
+Aur\'elien Bouteiller
+
+George Bosilca
+
+Yutaka Ishikawa
+
+\end{biog}
 
 \end{document}
