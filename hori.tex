@@ -1,6 +1,10 @@
-\documentclass[Afour,times,sagev]{sagej}
+\documentclass[Afour,times,sageh]{sagej}
 \usepackage{url}
 \usepackage{color}
+
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+\setcitestyle{authoryear,open={(},close={)}}
 
 \long\def\comment#1{}
 
@@ -202,8 +206,8 @@ spare node set to substitute the failed node, 3) recover the
 process(es) on the spare node possibly from a checkpoint, 4)
 rearrange the physical process-to-node mapping to minimize the
 communication performance degradation and MPI communicator(s) to
-minimize the change of user program, \AH{5) if the new process-to-node
-mapping requires migration of some processes, do the migration, and}
+minimize the change of user program, 5) if the new process-to-node
+mapping requires migration of some processes, do the migration, and
 6) finally, the user program
 resumes its execution.
 
@@ -316,12 +320,12 @@ reserved, denoted {\it 2D(2,2)}. In this notation, ``2D'' means that
 the allocation applies to the 2D plane, the first number in the
 brackets is the number of sides in which spare nodes are reserved, and
 the second number is the thickness, number of columns or rows, of a
-side of spare nodes reserved. \AH{On a 3D network, a job is generally
+side of spare nodes reserved. On a 3D network, a job is generally
 allocated on a cube. Here, {\it 3D(2,*)} means two 2D side planes
 out of 3 dimensions of the cube are allocated as spare nodes. If the
 allocated cube is regular, having the same size in all dimensions,
 which side to be allocated does not matter. Otherwise, the number of
-spare nodes in the two side planes matters. }
+spare nodes in the two side planes matters. 
 
 \begin{figure}[ht]
 \centering
@@ -454,8 +458,8 @@ spare node to which the Manhattan distance is the shortest.
 
 Figure \ref{fig:0d-worst-cases} shows examples of the results of
 replacing multiple faulty nodes when using the 0D sliding method with
-the 2D(1,1) allocation. \AH{In this figure, each rectangles represents a
-node, assuming node space can be represented in a 2D way.} On the
+the 2D(1,1) allocation. In this figure, each rectangles represents a
+node, assuming node space can be represented in a 2D way. On the
 left-hand panel, nodes 1 through 5 have failed and have been replaced
 by spare nodes 1' through 5', respectively. The spare nodes were
 chosen so as to minimize the number of hop counts between each faulty
@@ -464,7 +468,7 @@ communication in the XY routing algorithm, the messages from all of
 the spare nodes to the nodes (A through F) adjacent to the failed
 nodes are routed through node 1' (because of the X direction routing
 of the XY routing algorithm). Thus, there are eleven messages in the
-network links between 1' and A  \AH{(these are shown in the white boxes)}:
+network links between 1' and A  (these are shown in the white boxes):
 these ten plus the normal stencil communication message between the
 nodes. This is the worst-case scenario for the 0D sliding method, and
 the number of faulty nodes is less than or equal to six.
@@ -698,7 +702,6 @@ mitigation.
 
 \section{Simulation}\label{sec:sim}
 
-\AH{
 We developed a simulator to imitate the proposed sliding methods on a
 stencil communication with a Cartesian network, and counted the maximum
 number of possible message collisions. We made the assumption that all stencil
@@ -706,9 +709,8 @@ messages are sent on all stencil dimensions simultaneously. Thus, the
 counted message collisions is the theoretical maximum and the actual
 message collisions on a real machine can be less than the simulated
 numbers because of the skew of sending messages to all dimensions. The
-skeleton of the simulation algorithm is described below;}
+skeleton of the simulation algorithm is described below;
 
-\AH{
 \begin{enumerate}
 \item choose one alive node randomly
 \item mark the chosen node as {\it failed} and apply a sliding
@@ -721,16 +723,15 @@ skeleton of the simulation algorithm is described below;}
   destination nodes.
 \item report the maximum value of {\it msg\_count} at all network links.
 \end{enumerate}
-}
 
 Since the number of combination of failed nodes is the factorial of
 the number of failed nodes, it is impossible to simulate all possible
 cases especially when the number of nodes is large. Instead of having
 the exhaustive search, the simulation results shown in this section
-are obtained with random sampling. \AH{The resulting node-rank mapping
+are obtained with random sampling. The resulting node-rank mapping
 pattern is saved into a file so that we can evaluate it on
 the real platform allowing the assessment of the quality of the evaluation
-with real data on a realistic scenario.}
+with real data on a realistic scenario.
 
 We chose the node spaces, 100x100 (2D), 12x12x12 (3D), and 24x24x24
 (3D). We chose the base number of 12 in 3D cases  because the minimum
@@ -852,7 +853,7 @@ listed in Table \ref{tbl:top5-network}.
 This experimental campaign will characterize the difference
 between the theoretical analysis and observed practical consequences.
 
-\AH{The stencil communication is simulated by replicating the usual
+The stencil communication is simulated by replicating the usual
 communication pattern in an MPI-based stencil: non-blocking communications with
 the neighbors ({\tt MPI\_Isend}, {\tt MPI\_Irecv} and {\tt MPI\_Wait}
 functions); all send and receive buffers are contiguous and no MPI derived
@@ -875,7 +876,7 @@ On the K computer and BG/Q, the MPI implementations provided by the vendors were
 used. Supposedly, those collective operations are tuned for their network
 topology and mapping.  This would reveal how the spare node allocation and
 sliding substitution would affect the collective performance. On TSUBAME 2.5,
-MVAPICH2, an open-source MPI implementation, was used.}
+MVAPICH2, an open-source MPI implementation, was used.
 
 We have focused our analytical effort on the
 maximum number of message collisions, which has the implicit
@@ -887,24 +888,21 @@ DMAs). When the actual number of simultaneous sends is only one, for
 example, the number messages injected into the network is decreased
 and the number of collisions is also reduced.
 
-\AH{The rank mapping after the node
+The rank mapping after the node
 failure(s) used in this evaluations are the same as the ones used in
 the simulation in the previous section.
 We measured the latency of those communication operations and the
 slowdown ratio is calculated based on the latency having spare
 nodes without having any node failure.
-}
-\AH{
+
 \[
 R^i = L_{no\_sub} / L_{sub}^i
 \]
-}
-\AH{
+
 Here, $L_{sub}^i$ is the measured communication latency after
 $i$th substitution, $L_{no\_sub}$ is the latency without having any
 node failure but having spare node set, and the $R^i$ is the
 slowdown ratio at that time.
-}
 
 The proposed sliding methods have been explained and discussed by
 using a 2D Cartesian network, however, the actual physical network can
@@ -1185,7 +1183,7 @@ happen also with the collective communications.
 
 \section{Related Work}\label{sec:related-work}
 
-\AH{Shadow replication proposes another replication scheme
+Shadow replication proposes another replication scheme
 for fault handling to meet Service Level Agreement
 (SLA)\citep{6785308}. Their unique feature is to minimize the
 additional power consumption by having replication (shadow)
@@ -1199,12 +1197,13 @@ SLA contracts. Having any sort of replication process consumes twice
 hardware resource.  In our proposed spare node utilization model, the
 additional resource for fault mitigation is far less than twice as
 shown in Figure \ref{fig:sparenode-percentage}.
-}
 
 Ferreira {\it et al.} indicated that dual hardware redundancy while
 utilizing only 50\% of the hardware resource, might be under some
 assumptions more efficient than the traditional checkpoint and restart
-method in Exascale systems This redundancies can be thought of as
+method in Exascale
+systems\cite{Ferreira:2011:EVP:2063384.2063443}. This redundancies can
+be thought of as 
 spare nodes. The difference is that the redundant nodes are {\it
   hotter}-standby than the hot-standby nodes waiting for the
 intermediate computational results. The spare nodes can be substituted
@@ -1233,8 +1232,10 @@ speaking, their paper reveals that finding an optimal node-rank
 mapping to level hot-spots according to network topology and
 communication pattern of an application is not an easy task.
 
-\AH{Fang {\it et al.} argued about the shrinking and
-non-shrinking post-recovery strategies. Although they use the spare
+Fang {\it et al.} argued about the shrinking and
+non-shrinking post-recovery
+strategies\citep{10.1007/978-3-319-27308-2_53}. Although they use the
+spare 
 node for the non-shrinking strategy, they did not propose any
 strategy on how to allocate a spare node set, how to select a spare node from
 the spare node set, nor how the failed node is substituted. Further,
@@ -1252,91 +1253,78 @@ the non-shrinking strategy by using spare nodes as superior, in terms
 of efficiency, to the shrinking strategy if failure rate is high. We
 believe the non-shrinking strategy proposed in this paper would be
 accepted by users in terms of easy of programming and performance.
-}
 
-\AH{As reported so far, our proposed sliding methods is to reduce the
-  additional latency for the communication after the failed node
-  substitution. There are ongoing works to reduce the communication
-  time by introducing new algorithms to improve the communication time
-  in parallel programs. Communication avoiding
-  algorithms\citep{Demmel:2012:CPS:2340316.2340324} for linear algebra
-  and temporal blocking algorithm for stencil
-  computation\citep{MURANUSHI20151303} are the examples of this
-  approach.  
-  These algorithms could improve both of the program execution time
-  without  having any failed nodes and the execution time after having
-  failed node  substitution. An application that succeeds to hide
-  communication latency perfectly may fail to hide the increased
-  latency due to the spare node substitutions. Thus, it is important
-  to explore the way to minimize the latency introduced by spare node
-  substitutions. 
-}
+As reported so far, our proposed sliding methods is to reduce the
+additional latency for the communication after the failed node
+substitution. There are ongoing works to reduce the communication
+time by introducing new algorithms to improve the communication time
+in parallel programs. Communication avoiding
+algorithms\citep{Demmel:2012:CPS:2340316.2340324} for linear algebra
+and temporal blocking algorithm for stencil
+computation\citep{MURANUSHI20151303} are the examples of this
+approach.  
+These algorithms could improve both of the program execution time
+without  having any failed nodes and the execution time after having
+failed node  substitution. An application that succeeds to hide
+communication latency perfectly may fail to hide the increased
+latency due to the spare node substitutions. Thus, it is important
+to explore the way to minimize the latency introduced by spare node
+substitutions. 
 
-\AH{ULFM~\cite{Bland01082013} supports both shrinking and
-  non-shrinking recovery. Upon the occurrence of a failure, instead of
-  aborting the application 
-  like in legacy MPI, ULFM produces an error code from the impacted
-  communication routines at surviving processes.  
-  Surviving processes may then continue to operate using point-to-point
-  routine between themselves, or interrupt the communication pattern of
-  the application with \texttt{MPIX\_Comm\_revoke} and rebuild fully
-  functional communicators excluding failed processes with
-  \texttt{MPIX\_Comm\_shrink}. When deploying this shrinking recovery
-  model with ULFM, the underlying implementation has no notion of
-  active and spare ranks.  From the ULFM perspective, all ranks are
-  application processes, with the same features. Our work expands on
-  this basic framework by adding at the user level an initial spare
-  allocation strategy as well as a substitution strategy that avoids
-  communication hotspots in the recovered application. The
-  non-shrinking recovery in ULFM builds on top of the previously
-  described shrinking model. Once a new communicator fit for issuing
-  collective operation has been reconstructed with the shrink routine,
-  spawning additional processes can be achieved with traditional MPI-2
-  dynamic process management routines (e.g.,
-  \texttt{MPI\_Comm\_spawn}). The ULFM spawn accepts non-standard
-  arguments to finely select where to allocate additional processes;
-  it is possible to select, from the application, which node will host
-  the supplementary processes. It is important to note however that
-  the default policy in ULFM is a simple round-robin among the
-  available slots in the existing allocation. The user remains in
-  charge of the decision making for advanced placement policy making
-  even in non-shrinking cases. 
-}
+ULFM~\cite{Bland01082013} supports both shrinking and
+non-shrinking recovery. Upon the occurrence of a failure, instead of
+aborting the application 
+like in legacy MPI, ULFM produces an error code from the impacted
+communication routines at surviving processes.  
+Surviving processes may then continue to operate using point-to-point
+routine between themselves, or interrupt the communication pattern of
+the application with \texttt{MPIX\_Comm\_revoke} and rebuild fully
+functional communicators excluding failed processes with
+\texttt{MPIX\_Comm\_shrink}. When deploying this shrinking recovery
+model with ULFM, the underlying implementation has no notion of
+active and spare ranks.  From the ULFM perspective, all ranks are
+application processes, with the same features. Our work expands on
+this basic framework by adding at the user level an initial spare
+allocation strategy as well as a substitution strategy that avoids
+communication hotspots in the recovered application. The
+non-shrinking recovery in ULFM builds on top of the previously
+described shrinking model. Once a new communicator fit for issuing
+collective operation has been reconstructed with the shrink routine,
+spawning additional processes can be achieved with traditional MPI-2
+dynamic process management routines (e.g.,
+\texttt{MPI\_Comm\_spawn}). The ULFM spawn accepts non-standard
+arguments to finely select where to allocate additional processes;
+it is possible to select, from the application, which node will host
+the supplementary processes. It is important to note however that
+the default policy in ULFM is a simple round-robin among the
+available slots in the existing allocation. The user remains in
+charge of the decision making for advanced placement policy making
+even in non-shrinking cases. 
 
-\AH{Fenix\cite{Gamell:2014:EAO:2683593.2683691} is a farmework to
-  automate the procedure to substitute  
-  failed node(s) with spare node(s) and to resume 
-  execution from a checkpoint. 
-  Laguna, et al. proposed {\em Reinit} API which is an extension of
-  existing MPI for bulk synchronous applications to survive from node
-  failure\cite{osti_1186781}. Fenix and Reinit provides easier-to-use API than ULFM and
-  supports non-shrinking strategy by assuming a spare node set. 
-  Both works depend on the \texttt{MPI\_Comm\_spawn*}
-  functions to substitute failed nodes. This means that the selection
-  of a spare node and definition of a spare node set depend on the
-  system and choosing a spare node according to a specific substitution 
-  strategy is out of control of applications. Further both did not
-  take into account the possibility of communication performance
-  degradation after the recovery. In contrast, this paper focused on
-  the possibility of such performance degradation and proposed sliding 
-  substitution methods to minimize the degradation. Our proposed
-  sliding methods can be integrated into such frameworks to improve
-  the performance after recovery.
-}
+Fenix\cite{Gamell:2014:EAO:2683593.2683691} is a farmework to
+automate the procedure to substitute  
+failed node(s) with spare node(s) and to resume 
+execution from a checkpoint. 
+Laguna, et al. proposed {\em Reinit} API which is an extension of
+existing MPI for bulk synchronous applications to survive from node
+failure\cite{osti_1186781}. Fenix and Reinit provides easier-to-use API than ULFM and
+supports non-shrinking strategy by assuming a spare node set. 
+Both works depend on the \texttt{MPI\_Comm\_spawn*}
+functions to substitute failed nodes. This means that the selection
+of a spare node and definition of a spare node set depend on the
+system and choosing a spare node according to a specific substitution 
+strategy is out of control of applications. Further both did not
+take into account the possibility of communication performance
+degradation after the recovery. In contrast, this paper focused on
+the possibility of such performance degradation and proposed sliding 
+substitution methods to minimize the degradation. Our proposed
+sliding methods can be integrated into such frameworks to improve
+the performance after recovery.
 
 \section{Discussion}
 
 \subsection{Node Utilization in a Multijob Environment}
 \label{sec:multi-job}
-
-\comment{
-Most supercomputers use a batch scheduling system, in which many jobs
-run simultaneously. The spare node percentages shown in Figure
-\ref{fig:sparenode-percentage} are for individuals jobs, not
-for the whole system. 
-If a machine has one million nodes and 100 jobs are running
-(for simplicity, assume that these jobs each require 10,000 nodes),
-then the overhead cost of spare nodes can exceed 10\%.}
 
 The possibility that a job has a failed node is proportional to the
 number of nodes assigned to the job and execution time. Thus, the
@@ -1482,7 +1470,6 @@ This research is partially supported by the CREST project of
 the Japan Science and Technology Agency (JST).
 \end{funding}
 
-\bibliographystyle{SageV}
 \bibliography{ref,hori}
 
 \end{document}
